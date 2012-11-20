@@ -1,3 +1,9 @@
+# Folder #
+/target/
+
+# Files #
+.DS_Store
+*/.DS_Store
 *.class
 
 # Package Files #
