@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * This Bolt analyses the given Twitter Status Text.
+ * 
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class AnalyseStatusTextBolt extends BaseRichBolt {

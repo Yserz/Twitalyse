@@ -7,9 +7,9 @@ import java.net.URL;
 import java.util.Properties;
 
 /**
- * Loads some propertyfiles
+ * This class loads various Property-Files.
  *
- * @author Michael Koppen mail: koppen@fh-brandenburg.de
+ * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class PropertyLoader {
 

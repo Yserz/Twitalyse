@@ -29,6 +29,7 @@ import de.fhb.twitalyse.bolt.Status;
 import java.util.Map;
 
 /**
+ * This Bolt gets the Twitter Status Text out of the whole Status.
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */

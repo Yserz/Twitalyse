@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
+ * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
  * 
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */

@@ -45,6 +45,9 @@ import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
 /**
+ * This Spout connects to the Twitter API and opens up a Stream.
+ * The Spout listens for new Twitter Stati posted on the public Twitter Channel 
+ * and push it in the System.
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */

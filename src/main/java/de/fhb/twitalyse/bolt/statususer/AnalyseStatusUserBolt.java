@@ -17,6 +17,7 @@
 package de.fhb.twitalyse.bolt.statususer;
 
 /**
+ * This Bolt analyses the Twitter User who postet the Twitter Status.
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
