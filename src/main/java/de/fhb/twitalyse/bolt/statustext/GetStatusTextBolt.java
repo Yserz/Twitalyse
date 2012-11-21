@@ -26,23 +26,16 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 import de.fhb.twitalyse.bolt.Status;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 /**
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class AnalyseStatusTextBolt extends BaseRichBolt {
+public class GetStatusTextBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
-	private List<String> ignoreWords;
 
-	public AnalyseStatusTextBolt(List<String> ignoreWords) {
-		this.ignoreWords = ignoreWords;
-	}
-	
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
@@ -51,22 +44,16 @@ public class AnalyseStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("AnalyseStatusTextBolt Status ID: "+id);
-		String text = input.getString(1);
-		System.out.println("AnalyseStatusTextBolt Text: "+text);
+		System.out.println("GetStatusTextBolt Status ID: "+id);
+		String json = input.getString(1);
+		System.out.println("GetStatusTextBolt JSON: "+json);
 		
-		text = text.toLowerCase();
-		//TODO: Clean up Text
-		for (String wordToIgnore : ignoreWords) {
-			text = text.replaceAll(wordToIgnore, "");
-		}
-		System.out.println("AnalyseStatusTextBolt filtered Text: "+text);
+		Gson gson = new Gson();
+		Status ts = gson.fromJson(json, Status.class);
 		
-		//TODO: Split and Analyse text here
-		text = text.trim();
-		List<String> splittedText = Arrays.asList(text.split(" "));
+		System.out.println("GetStatusTextBolt Extracted Status Text: "+ts.text);
 		
-		collector.emit(input, new Values("word", 0));
+		collector.emit(input, new Values(id, ts.text));
 		collector.ack(input);
 	}
 
@@ -76,6 +63,6 @@ public class AnalyseStatusTextBolt extends BaseRichBolt {
 //	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("word", "count"));
+		declarer.declare(new Fields("id", "text"));
 	}
 }

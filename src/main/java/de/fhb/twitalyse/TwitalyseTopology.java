@@ -23,7 +23,11 @@ import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
 import backtype.storm.utils.Utils;
 import de.fhb.twitalyse.bolt.statustext.AnalyseStatusTextBolt;
+import de.fhb.twitalyse.bolt.statustext.GetStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -37,18 +41,27 @@ public class TwitalyseTopology {
 		
 		PropertyLoader propLoader = new PropertyLoader();
 		
+		// get twitter credentials
 		Properties twitterProps = propLoader.loadSystemProperty("/twitterProps.properties");
 		String consumerKey = twitterProps.getProperty("consumerKey");
 		String consumerKeySecure = twitterProps.getProperty("consumerKeySecure");
 		String token = twitterProps.getProperty("token");
 		String tokenSecret = twitterProps.getProperty("tokenSecret");
 		
-		TwitterStreamSpout spout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret);
-		AnalyseStatusTextBolt bolt = new AnalyseStatusTextBolt();
+		// get ignoredWords
+		String ignoreWords = propLoader.loadSystemProperty("/ignoreWords.properties").getProperty("ignoreWords");
+		List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
+		
+		
+		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret);
+		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
+		AnalyseStatusTextBolt analyseTextBolt = new AnalyseStatusTextBolt(ignoreList);
 
-		builder.setSpout("spout", spout, 1);
-		builder.setBolt("textBolt", bolt)
-				.shuffleGrouping("spout");
+		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
+		builder.setBolt("getTextBolt", getTextBolt)
+				.shuffleGrouping("twitterStreamSpout");
+		builder.setBolt("analyseTextBolt", analyseTextBolt)
+				.shuffleGrouping("getTextBolt");
 
 		Config conf = new Config();
         conf.setDebug(true);
