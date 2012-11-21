@@ -24,6 +24,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.utils.Utils;
 import de.fhb.twitalyse.bolt.statustext.AnalyseStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
+import java.util.Properties;
 
 /**
  * 
@@ -34,7 +35,15 @@ public class TwitalyseTopology {
 	public static void main(String[] args) throws Exception{
 		TopologyBuilder builder = new TopologyBuilder();
 		
-		TwitterStreamSpout spout = new TwitterStreamSpout();
+		PropertyLoader propLoader = new PropertyLoader();
+		
+		Properties twitterProps = propLoader.loadSystemProperty("/twitterProps.properties");
+		String consumerKey = twitterProps.getProperty("consumerKey");
+		String consumerKeySecure = twitterProps.getProperty("consumerKeySecure");
+		String token = twitterProps.getProperty("token");
+		String tokenSecret = twitterProps.getProperty("tokenSecret");
+		
+		TwitterStreamSpout spout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret);
 		AnalyseStatusTextBolt bolt = new AnalyseStatusTextBolt();
 
 		builder.setSpout("spout", spout, 1);

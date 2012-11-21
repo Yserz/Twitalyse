@@ -47,6 +47,7 @@ public class AnalyseStatusTextBolt extends BaseRichBolt {
 		String json = input.getString(1);
 		Gson gson = new Gson();
 		Status ts = gson.fromJson(json, Status.class);
+		String text = ts.text;
 		// TODO: Split and Wordcount here
 //		collector.emit(input, new Values(val * 2, val * 3));
 		collector.ack(input);

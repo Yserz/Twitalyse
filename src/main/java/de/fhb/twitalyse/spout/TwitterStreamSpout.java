@@ -25,10 +25,13 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.InprocMessaging;
 import backtype.storm.utils.Utils;
+import de.fhb.twitalyse.PropertyLoader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import twitter4j.Status;
@@ -48,19 +51,25 @@ import twitter4j.json.DataObjectFactory;
 public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	private final static Logger LOGGER = Logger.getLogger(TwitterStreamSpout.class.getName());
+	
 	//Keys die die App identifizieren
-	private final String consumerKey = "";
-	private final String consumerKeySecure = "";
+	private final String CONSUMER_KEY;
+	private final String CONSUMER_KEY_SECURE;
 	//Keys die den Account des Users identifizieren
-	private final String token = "";
-	private final String tokenSecret = "";
+	private final String TOKEN;
+	private final String TOKEN_SECRET;
 	private int id;
 	private AckFailDelegate ackFailDelegate;
 	private transient SpoutOutputCollector collector;
 	private transient TwitterStream twitterStream;
 
-	public TwitterStreamSpout() {
+	public TwitterStreamSpout(String consumerKey, String consumerKeySecure, String token, String tokenSecret) {
 		id = InprocMessaging.acquireNewPort();
+		this.CONSUMER_KEY = consumerKey;
+		this.CONSUMER_KEY_SECURE = consumerKeySecure;
+		this.TOKEN = token;
+		this.TOKEN_SECRET = tokenSecret;
+		
 	}
 
 	public void setAckFailDelegate(AckFailDelegate d) {
@@ -83,8 +92,8 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 		TwitterStreamFactory twitterStreamFactory = new TwitterStreamFactory(cb.build());
 		twitterStream = twitterStreamFactory.getInstance();
 
-		AccessToken givenAccessToken = new AccessToken(token, tokenSecret);
-		twitterStream.setOAuthConsumer(consumerKey, consumerKeySecure);
+		AccessToken givenAccessToken = new AccessToken(TOKEN, TOKEN_SECRET);
+		twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECURE);
 		twitterStream.setOAuthAccessToken(givenAccessToken);
 		twitterStream.addListener(this);
 		twitterStream.sample();
