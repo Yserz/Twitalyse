@@ -10,3 +10,4 @@
 *.jar
 *.war
 *.ear
+/src/main/resources/twitterProps.properties
