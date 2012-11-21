@@ -26,17 +26,27 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 import de.fhb.twitalyse.bolt.Status;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import redis.clients.jedis.Jedis;
 
 /**
- * This Bolt gets the Twitter Status Text out of the whole Status.
- *
+ * This Bolt analyses the given Twitter Status Text.
+ * 
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class GetStatusTextBolt extends BaseRichBolt {
+public class SplitStatusTextBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
+	private List<String> ignoreWords;
+	private transient Jedis jedis;
 
+	public SplitStatusTextBolt(List<String> ignoreWords, Jedis jedis) {
+		this.ignoreWords = ignoreWords;
+		this.jedis = jedis;
+	}
+	
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
@@ -45,33 +55,35 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("GetStatusTextBolt Status ID: " + id);
-		String json = input.getString(1);
-//		System.out.println("GetStatusTextBolt JSON: "+json);
-
-		try {
-			Gson gson = new Gson();
-			Status ts = gson.fromJson(json, Status.class);
-
-			System.out.println("GetStatusTextBolt Extracted Status Text: " + ts.text);
-
-			collector.emit(input, new Values(id, ts.text));
-			collector.ack(input);
-		} catch (RuntimeException re) {
-			System.out.println("########################################################");
-			System.out.println("Exception: "+re);
-			System.out.println("JSON: "+json);
-			System.out.println("########################################################");
+		System.out.println("AnalyseStatusTextBolt Status ID: "+id);
+		String text = input.getString(1);
+		System.out.println("AnalyseStatusTextBolt Text: "+text);
+		
+		text = text.toLowerCase();
+		//Clean up text
+		for (String wordToIgnore : ignoreWords) {
+			text = text.replaceAll(wordToIgnore, "");
 		}
-
+		System.out.println("AnalyseStatusTextBolt filtered Text: "+text);
+		
+		//Split text
+		text = text.trim();
+		List<String> splittedText = Arrays.asList(text.split(" "));
+		
+		for (String word : splittedText) {
+			
+			word = word.trim();
+			if (!word.equals("") && word.length()>=3) {
+				jedis.incr("#words");
+				collector.emit(input, new Values(word));
+			}
+		}
+		
+		collector.ack(input);
 	}
 
-//	@Override
-//	public void cleanup() {
-//		
-//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("id", "text"));
-	}
+		declarer.declare(new Fields("word"));
+	}	
 }

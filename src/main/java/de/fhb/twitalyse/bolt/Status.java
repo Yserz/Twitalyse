@@ -22,26 +22,26 @@ package de.fhb.twitalyse.bolt;
  */
 public class Status {
 
-	public String contributors;
-	public String coordinates;
+//	public String contributors;
+//	public String coordinates;
 	public String created_at;
-	public Entities entities;
+//	public Entities entities;
 	public Boolean favorited;
-	public String geo;
+//	public String geo;
 	public Long id;
 	public String id_str;
-	public String in_reply_to_screen_name;
-	public String in_reply_to_status_id;
-	public String in_reply_to_status_id_str;
-	public String in_reply_to_user_id;
-	public String in_reply_to_user_id_str;
-	public String place;
+//	public String in_reply_to_screen_name;
+//	public String in_reply_to_status_id;
+//	public String in_reply_to_status_id_str;
+//	public String in_reply_to_user_id;
+//	public String in_reply_to_user_id_str;
+//	public String place;
 	public Long retweet_count;
 	public Boolean retweeted;
-	public Retweeted_status retweeted_status;
+//	public Retweeted_status retweeted_status;
 	public String source;
 	public String text;
 	public Boolean truncated;
-	public User user;
+//	public User user;
 
 }

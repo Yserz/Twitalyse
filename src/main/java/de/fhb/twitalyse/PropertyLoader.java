@@ -3,8 +3,11 @@ package de.fhb.twitalyse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * This class loads various Property-Files.
@@ -23,11 +26,11 @@ public class PropertyLoader {
 	public Properties loadSystemProperty(String path) throws IOException {
 		Properties props = new Properties();
 		try {
-			URL url = de.fhb.twitalyse.PropertyLoader.class.getResource(path);
-			File temp = new File(url.getFile());
-			FileInputStream stream = new FileInputStream(temp);
-			props.load(stream);
-			stream.close();
+			ClassLoader loader = ClassLoader.getSystemClassLoader();
+			InputStream in = loader.getResourceAsStream(path);
+			props.load(in);
+			
+			
 		} finally {
 			//May set some default values.
 		}

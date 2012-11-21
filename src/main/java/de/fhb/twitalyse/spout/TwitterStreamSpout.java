@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import redis.clients.jedis.Jedis;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
@@ -65,13 +66,15 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	private AckFailDelegate ackFailDelegate;
 	private transient SpoutOutputCollector collector;
 	private transient TwitterStream twitterStream;
+	private transient Jedis jedis;
 
-	public TwitterStreamSpout(String consumerKey, String consumerKeySecure, String token, String tokenSecret) {
+	public TwitterStreamSpout(String consumerKey, String consumerKeySecure, String token, String tokenSecret, Jedis jedis) {
 		id = InprocMessaging.acquireNewPort();
 		this.CONSUMER_KEY = consumerKey;
 		this.CONSUMER_KEY_SECURE = consumerKeySecure;
 		this.TOKEN = token;
 		this.TOKEN_SECRET = tokenSecret;
+		this.jedis = jedis;
 		
 	}
 
@@ -115,6 +118,7 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 		if (value == null) {
 			Utils.sleep(50);
 		} else {
+			jedis.incr("#stati");
 			// Status ID + Status-JSON
 			collector.emit(new Values(value.get(0), value.get(1)));
 		}

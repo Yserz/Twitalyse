@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.statustext;
+package de.fhb.twitalyse.bolt.redis;
 
+import de.fhb.twitalyse.bolt.statustext.*;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
@@ -26,57 +27,46 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 import de.fhb.twitalyse.bolt.Status;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
- * This Bolt analyses the given Twitter Status Text.
- * 
+ * This Bolt gets the Twitter Status Text out of the whole Status.
+ *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class AnalyseStatusTextBolt extends BaseRichBolt {
+public class CountWordsBolt extends BaseRichBolt {
 
-	private OutputCollector collector;
-	private List<String> ignoreWords;
+	private Jedis jedis;
 
-	public AnalyseStatusTextBolt(List<String> ignoreWords) {
-		this.ignoreWords = ignoreWords;
+	public CountWordsBolt(Jedis jedis) {
+		this.jedis = jedis;
 	}
-	
+
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		this.collector = collector;
 	}
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
-		System.out.println("AnalyseStatusTextBolt Status ID: "+id);
-		String text = input.getString(1);
-		System.out.println("AnalyseStatusTextBolt Text: "+text);
-		
-		text = text.toLowerCase();
-		//TODO: Clean up Text
-		for (String wordToIgnore : ignoreWords) {
-			text = text.replaceAll(wordToIgnore, "");
+		String word = input.getString(0);
+		System.out.println("CountWordsBolt Word: " + word);
+
+
+		try {
+			jedis.hincrBy("words", word, 1L);
+//			long value = Long.valueOf(jedis.hget("words", word));
+		} catch (JedisConnectionException e) {
+			System.out.println("################################################");
+			System.out.println("Exception: " + e);
+			System.out.println("################################################");
 		}
-		System.out.println("AnalyseStatusTextBolt filtered Text: "+text);
-		
-		//TODO: Split and Analyse text here
-		text = text.trim();
-		List<String> splittedText = Arrays.asList(text.split(" "));
-		
-		collector.emit(input, new Values("word", 0));
-		collector.ack(input);
+
 	}
 
-//	@Override
-//	public void cleanup() {
-//		
-//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("word", "count"));
+//		declarer.declare(new Fields("id", "text"));
 	}
 }
