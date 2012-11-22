@@ -66,16 +66,18 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	private AckFailDelegate ackFailDelegate;
 	private transient SpoutOutputCollector collector;
 	private transient TwitterStream twitterStream;
-	private transient Jedis jedis;
+	
+	private String host;
+	private int port;
 
-	public TwitterStreamSpout(String consumerKey, String consumerKeySecure, String token, String tokenSecret, Jedis jedis) {
+	public TwitterStreamSpout(String consumerKey, String consumerKeySecure, String token, String tokenSecret, String host, int port) {
 		id = InprocMessaging.acquireNewPort();
 		this.CONSUMER_KEY = consumerKey;
 		this.CONSUMER_KEY_SECURE = consumerKeySecure;
 		this.TOKEN = token;
 		this.TOKEN_SECRET = tokenSecret;
-		this.jedis = jedis;
-		
+		this.host = host;
+		this.port = port;
 	}
 
 	public void setAckFailDelegate(AckFailDelegate d) {
@@ -118,15 +120,21 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 		if (value == null) {
 			Utils.sleep(50);
 		} else {
+			Jedis jedis = new Jedis(host, port);
+			jedis.getClient().setTimeout(9999);
+			
 			jedis.incr("#stati");
 			// Status ID + Status-JSON
 			collector.emit(new Values(value.get(0), value.get(1)));
+			
+			jedis.disconnect();
 		}
 	}
 
 	@Override
 	public void close() {
 		twitterStream.shutdown();
+		
 	}
 
 	@Override

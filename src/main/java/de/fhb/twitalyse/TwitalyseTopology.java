@@ -54,25 +54,25 @@ public class TwitalyseTopology {
 //		String token = twitterProps.getProperty("token");
 //		String tokenSecret = twitterProps.getProperty("tokenSecret");
 
-		String consumerKey = "";
-		String consumerKeySecure = "";
-		String token = "";
-		String tokenSecret = "";
+		String consumerKey = "XofYnF58nnR1fBIwGq3dQ";
+		String consumerKeySecure = "XtXFcPUzhjQAoDTRQTA7jm3Pw2m3IRX1fDf3kALqBUg";
+		String token = "403358935-CXqlVYe8nKLBm9buxU55vES9HSBdgG5fbCLfOo";
+		String tokenSecret = "2W6d3aNWLYTLcxWCsXDoBesDsiJADh7B0iWxERa9AnU";
 
 		// get ignoredWords
 //		String ignoreWords = propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
 //		List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
 
 		List<String> ignoreList = new ArrayList<String>();
-		ignoreList.add(".");
+		ignoreList.add("\\.");
 		ignoreList.add("-");
 		ignoreList.add(",");
 		ignoreList.add("!");
-		ignoreList.add("?");
+		ignoreList.add("\\?");
 		ignoreList.add(":");
 		ignoreList.add(";");
 		ignoreList.add("'");
-		ignoreList.add("|");
+		ignoreList.add("\\|");
 		ignoreList.add("%");
 		ignoreList.add("0");
 		ignoreList.add("1");
@@ -90,11 +90,11 @@ public class TwitalyseTopology {
 //		String host = redisProps.getProperty("host");
 //		int port = Integer.valueOf(redisProps.getProperty("port"));
 
-		String host = "";
+		String host = "ec2-54-246-55-86.eu-west-1.compute.amazonaws.com";
 		int port = 6379;
 		
 		Jedis jedis = new Jedis(host, port);
-		jedis.getClient().setTimeout(300);
+		jedis.getClient().setTimeout(9999);
 		
 //		#########################################################
 //		#					Jedis Key´s							#
@@ -111,10 +111,10 @@ public class TwitalyseTopology {
 //		#########################################################
 		
 
-		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret, jedis);
+		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret, host, port);
 		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
-		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(ignoreList, jedis);
-		CountWordsBolt countWordsBolt = new CountWordsBolt(jedis);
+		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(ignoreList, host, port);
+		CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
 
 		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
 		builder.setBolt("getTextBolt", getTextBolt)
@@ -138,7 +138,7 @@ public class TwitalyseTopology {
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());
 
-			Utils.sleep(100000);
+			Utils.sleep(30000);
 
 			cluster.shutdown();
 			

@@ -40,12 +40,16 @@ public class SplitStatusTextBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
 	private List<String> ignoreWords;
-	private transient Jedis jedis;
+	private String host;
+	private int port;
 
-	public SplitStatusTextBolt(List<String> ignoreWords, Jedis jedis) {
+	public SplitStatusTextBolt(List<String> ignoreWords, String host, int port) {
 		this.ignoreWords = ignoreWords;
-		this.jedis = jedis;
+		this.host = host;
+		this.port = port;
 	}
+
+	
 	
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
@@ -70,16 +74,21 @@ public class SplitStatusTextBolt extends BaseRichBolt {
 		text = text.trim();
 		List<String> splittedText = Arrays.asList(text.split(" "));
 		
+		Jedis jedis = new Jedis(host, port);
+		jedis.getClient().setTimeout(9999);
+		
 		for (String word : splittedText) {
 			
 			word = word.trim();
 			if (!word.equals("") && word.length()>=3) {
+				
 				jedis.incr("#words");
 				collector.emit(input, new Values(word));
 			}
 		}
 		
 		collector.ack(input);
+		jedis.disconnect();
 	}
 
 	@Override

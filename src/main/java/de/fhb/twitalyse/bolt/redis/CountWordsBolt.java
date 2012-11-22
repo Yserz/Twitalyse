@@ -16,17 +16,11 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import de.fhb.twitalyse.bolt.statustext.*;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
-import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
-import backtype.storm.tuple.Values;
-import com.google.gson.Gson;
-import de.fhb.twitalyse.bolt.Status;
 import java.util.Map;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -38,11 +32,15 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
  */
 public class CountWordsBolt extends BaseRichBolt {
 
-	private Jedis jedis;
+	private String host;
+	private int port;
 
-	public CountWordsBolt(Jedis jedis) {
-		this.jedis = jedis;
+	public CountWordsBolt(String host, int port) {
+		this.host = host;
+		this.port = port;
 	}
+
+	
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
@@ -55,8 +53,12 @@ public class CountWordsBolt extends BaseRichBolt {
 
 
 		try {
+			Jedis jedis = new Jedis(host, port);
+			jedis.getClient().setTimeout(9999);
+			
 			jedis.hincrBy("words", word, 1L);
-//			long value = Long.valueOf(jedis.hget("words", word));
+			
+			jedis.disconnect();
 		} catch (JedisConnectionException e) {
 			System.out.println("################################################");
 			System.out.println("Exception: " + e);
