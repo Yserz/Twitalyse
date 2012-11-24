@@ -20,6 +20,7 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
+<<<<<<< HEAD
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
@@ -59,6 +60,46 @@ public class SplitRetweetCounterBolt extends BaseRichBolt{
 			System.out.println("SplitRetweetCountBolt Retweet Status : " + ts.retweet_count);
                         
 			collector.emit(input, new Values(ts.retweet_count));
+=======
+import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import com.google.gson.Gson;
+import de.fhb.twitalyse.bolt.Status;
+import java.util.Map;
+
+/**
+ * This Bolt gets the Twitter Retweet Count out of the whole Status.
+ *
+ * @author Andy Klay <klay@fh-brandenburg.de>
+ */
+public class SplitRetweetCounterBolt extends BaseRichBolt{
+    
+    
+       private OutputCollector collector;
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+            this.collector = collector;
+    }
+
+    @Override
+    public void execute(Tuple input) {
+		long id = input.getLong(0);
+		System.out.println("SplitRetweetCountBolt Status ID: " + id);
+		String json = input.getString(1);
+
+		try {
+			Gson gson = new Gson();
+			Status ts = gson.fromJson(json, Status.class);
+			System.out.println("SplitRetweetCountBolt Retweet Status : " + ts.retweet_count);
+                        
+			collector.emit(input, new Values(id, ts.retweet_count));
+>>>>>>> refs/remotes/origin/master
 			collector.ack(input);
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");

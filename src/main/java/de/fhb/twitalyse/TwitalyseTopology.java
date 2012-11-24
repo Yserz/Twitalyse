@@ -25,13 +25,22 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
+<<<<<<< HEAD
 import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
+=======
+import backtype.storm.tuple.Fields;
+import backtype.storm.utils.Utils;
+import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
+>>>>>>> refs/remotes/origin/master
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.statustext.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.statustext.SplitRetweetCounterBolt;
+<<<<<<< HEAD
 import de.fhb.twitalyse.bolt.statustext.SplitStatusTextBolt;
+=======
+>>>>>>> refs/remotes/origin/master
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 
 /**
@@ -98,6 +107,7 @@ public class TwitalyseTopology {
 		Jedis jedis = new Jedis(host, port);
 		jedis.getClient().setTimeout(9999);
 
+<<<<<<< HEAD
 		// #########################################################
 		// # Jedis Key´s #
 		// #########################################################
@@ -114,17 +124,32 @@ public class TwitalyseTopology {
 
 		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(
 				consumerKey, consumerKeySecure, token, tokenSecret, host, port);
+=======
+		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret, host, port);
+                
+                //Status Text Topology
+>>>>>>> refs/remotes/origin/master
 		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
 		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(
 				ignoreList, host, port);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
+<<<<<<< HEAD
 		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
 		CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
 
+=======
+>>>>>>> refs/remotes/origin/master
 		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
+<<<<<<< HEAD
 		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
 				"twitterStreamSpout");
+=======
+                
+		builder.setBolt("getTextBolt", getTextBolt)
+                        .shuffleGrouping("twitterStreamSpout");  
+>>>>>>> refs/remotes/origin/master
 		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
+<<<<<<< HEAD
 				.shuffleGrouping("getTextBolt");
 		builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping(
 				"splitStatusTextBolt");
@@ -143,6 +168,20 @@ public class TwitalyseTopology {
                .shuffleGrouping("twitterStreamSpout");
         builder.setBolt("countRetweetBolt", countRetweetBolt)
                .shuffleGrouping("splitRetweetCounterBolt");
+=======
+                        .shuffleGrouping("getTextBolt");  
+		builder.setBolt("countWordsBolt", countWordsBolt)
+                        .shuffleGrouping("splitStatusTextBolt");
+                
+                //Retweet Counter Topology 
+                SplitRetweetCounterBolt splitRetweetCounterBolt = new SplitRetweetCounterBolt();
+                CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
+                
+                builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
+                       .shuffleGrouping("twitterStreamSpout");
+                builder.setBolt("countRetweetBolt", countRetweetBolt)
+                       .shuffleGrouping("splitRetweetCounterBolt");
+>>>>>>> refs/remotes/origin/master
 
 		Config conf = new Config();
 		conf.setDebug(false);

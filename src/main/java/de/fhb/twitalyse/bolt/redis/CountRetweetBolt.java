@@ -56,7 +56,11 @@ public class CountRetweetBolt extends BaseRichBolt {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 			
+<<<<<<< HEAD
                         jedis.incrBy("#retweets", counter);
+=======
+                        jedis.incrBy("retweetCount", counter);
+>>>>>>> refs/remotes/origin/master
 			jedis.disconnect();
                         
 		} catch (JedisConnectionException e) {
