@@ -25,22 +25,13 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-<<<<<<< HEAD
 import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
-=======
-import backtype.storm.tuple.Fields;
-import backtype.storm.utils.Utils;
-import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
->>>>>>> refs/remotes/origin/master
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
-import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
+import de.fhb.twitalyse.bolt.statustext.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.statustext.GetStatusTextBolt;
-import de.fhb.twitalyse.bolt.statustext.SplitRetweetCounterBolt;
-<<<<<<< HEAD
+import de.fhb.twitalyse.bolt.statustext.GetStatusRetweetCountBolt;
 import de.fhb.twitalyse.bolt.statustext.SplitStatusTextBolt;
-=======
->>>>>>> refs/remotes/origin/master
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 
 /**
@@ -64,10 +55,12 @@ public class TwitalyseTopology {
 		// String token = twitterProps.getProperty("token");
 		// String tokenSecret = twitterProps.getProperty("tokenSecret");
 
-		String consumerKey = "XofYnF58nnR1fBIwGq3dQ";
-		String consumerKeySecure = "XtXFcPUzhjQAoDTRQTA7jm3Pw2m3IRX1fDf3kALqBUg";
-		String token = "403358935-CXqlVYe8nKLBm9buxU55vES9HSBdgG5fbCLfOo";
-		String tokenSecret = "2W6d3aNWLYTLcxWCsXDoBesDsiJADh7B0iWxERa9AnU";
+		
+		// Von nen TwitterBot, also wayne
+		String consumerKey = "nWFE2fbPkOHH9RDa1gIUfw";
+		String consumerKeySecure = "DZ1SX9JcGkGiuUNIMPaXQAROXqCei0N7a0tHYoTI";
+		String token = "405566320-d7swfKTwiePNSsrDLpcVyDAFNQN4jX2ybwIxLyOw";
+		String tokenSecret = "o0d56crKfIgCTyeEymelAPmSFCydCMaRQB320U95o";
 
 		// get ignoredWords
 		// String ignoreWords =
@@ -107,7 +100,6 @@ public class TwitalyseTopology {
 		Jedis jedis = new Jedis(host, port);
 		jedis.getClient().setTimeout(9999);
 
-<<<<<<< HEAD
 		// #########################################################
 		// # Jedis Key´s #
 		// #########################################################
@@ -124,32 +116,21 @@ public class TwitalyseTopology {
 
 		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(
 				consumerKey, consumerKeySecure, token, tokenSecret, host, port);
-=======
-		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret, host, port);
-                
-                //Status Text Topology
->>>>>>> refs/remotes/origin/master
 		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
 		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(
 				ignoreList, host, port);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
-<<<<<<< HEAD
 		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
 		CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
 
-=======
->>>>>>> refs/remotes/origin/master
+		// WordCount
 		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
-<<<<<<< HEAD
 		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
 				"twitterStreamSpout");
-=======
-                
-		builder.setBolt("getTextBolt", getTextBolt)
-                        .shuffleGrouping("twitterStreamSpout");  
->>>>>>> refs/remotes/origin/master
+
+		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
+				"twitterStreamSpout");
 		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
-<<<<<<< HEAD
 				.shuffleGrouping("getTextBolt");
 		builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping(
 				"splitStatusTextBolt");
@@ -159,29 +140,17 @@ public class TwitalyseTopology {
 				.shuffleGrouping("twitterStreamSpout");
 		builder.setBolt("countSourceBolt", countSourceBolt).shuffleGrouping(
 				"getStatusSourceBolt");
-		
-		 // Retweet Counter Topology 
-        SplitRetweetCounterBolt splitRetweetCounterBolt = new SplitRetweetCounterBolt();
-        CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
-        
-        builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
-               .shuffleGrouping("twitterStreamSpout");
-        builder.setBolt("countRetweetBolt", countRetweetBolt)
-               .shuffleGrouping("splitRetweetCounterBolt");
-=======
-                        .shuffleGrouping("getTextBolt");  
-		builder.setBolt("countWordsBolt", countWordsBolt)
-                        .shuffleGrouping("splitStatusTextBolt");
-                
-                //Retweet Counter Topology 
-                SplitRetweetCounterBolt splitRetweetCounterBolt = new SplitRetweetCounterBolt();
-                CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
-                
-                builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
-                       .shuffleGrouping("twitterStreamSpout");
-                builder.setBolt("countRetweetBolt", countRetweetBolt)
-                       .shuffleGrouping("splitRetweetCounterBolt");
->>>>>>> refs/remotes/origin/master
+
+		// Retweet Counter Topology
+		GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
+		CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
+
+		builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
+				.shuffleGrouping("twitterStreamSpout");
+		builder.setBolt("countRetweetBolt", countRetweetBolt).shuffleGrouping(
+				"splitRetweetCounterBolt");
+		builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping(
+				"splitStatusTextBolt");
 
 		Config conf = new Config();
 		conf.setDebug(false);
@@ -200,19 +169,6 @@ public class TwitalyseTopology {
 			Thread.sleep(10000);
 
 			cluster.shutdown();
-
-			Map<String, String> words = jedis.hgetAll("words");
-
-			System.out
-					.println("################################################");
-			if (words != null && !words.isEmpty()) {
-				for (Map.Entry<String, String> entry : words.entrySet()) {
-					System.out.println(">>\t\t" + entry.getKey() + "\t\t=\t\t"
-							+ entry.getValue());
-				}
-			}
-			System.out
-					.println("################################################");
 		}
 
 		jedis.disconnect();

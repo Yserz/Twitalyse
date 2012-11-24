@@ -27,7 +27,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * This Bolt adds the Twitter Retweet Count into Redis.
- *
+ * 
  * @author Andy Klay <koppen@fh-brandenburg.de>
  */
 public class CountRetweetBolt extends BaseRichBolt {
@@ -40,10 +40,9 @@ public class CountRetweetBolt extends BaseRichBolt {
 		this.port = port;
 	}
 
-	
-
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map stormConf, TopologyContext context,
+			OutputCollector collector) {
 	}
 
 	@Override
@@ -51,28 +50,25 @@ public class CountRetweetBolt extends BaseRichBolt {
 		long counter = input.getLong(0);
 		System.out.println("CountRetweetBolt : " + counter);
 
-
 		try {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
-			
-<<<<<<< HEAD
-                        jedis.incrBy("#retweets", counter);
-=======
-                        jedis.incrBy("retweetCount", counter);
->>>>>>> refs/remotes/origin/master
+			jedis.incrBy("#retweets", counter);
+
 			jedis.disconnect();
-                        
+
 		} catch (JedisConnectionException e) {
-			System.out.println("################################################");
+			System.out
+					.println("################################################");
 			System.out.println("Exception: " + e);
-			System.out.println("################################################");
+			System.out
+					.println("################################################");
 		}
 
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-//		declarer.declare(new Fields("id", "text"));
+		// declarer.declare(new Fields("id", "text"));
 	}
 }

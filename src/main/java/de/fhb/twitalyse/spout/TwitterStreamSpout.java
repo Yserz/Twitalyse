@@ -110,7 +110,6 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	@Override
 	public void onStatus(Status status) {
 		String json = DataObjectFactory.getRawJSON(status);
-//        System.out.println(json);
 		InprocMessaging.sendMessage(id, new Values(status.getId(), json));
 	}
 
