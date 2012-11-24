@@ -54,10 +54,10 @@ public class TwitalyseTopology {
 //		String token = twitterProps.getProperty("token");
 //		String tokenSecret = twitterProps.getProperty("tokenSecret");
 
-		String consumerKey = "XofYnF58nnR1fBIwGq3dQ";
-		String consumerKeySecure = "XtXFcPUzhjQAoDTRQTA7jm3Pw2m3IRX1fDf3kALqBUg";
-		String token = "403358935-CXqlVYe8nKLBm9buxU55vES9HSBdgG5fbCLfOo";
-		String tokenSecret = "2W6d3aNWLYTLcxWCsXDoBesDsiJADh7B0iWxERa9AnU";
+		String consumerKey = "";
+		String consumerKeySecure = "";
+		String token = "";
+		String tokenSecret = "";
 
 		// get ignoredWords
 //		String ignoreWords = propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
@@ -90,7 +90,7 @@ public class TwitalyseTopology {
 //		String host = redisProps.getProperty("host");
 //		int port = Integer.valueOf(redisProps.getProperty("port"));
 
-		String host = "ec2-54-246-55-86.eu-west-1.compute.amazonaws.com";
+		String host = "";
 		int port = 6379;
 		
 		Jedis jedis = new Jedis(host, port);
