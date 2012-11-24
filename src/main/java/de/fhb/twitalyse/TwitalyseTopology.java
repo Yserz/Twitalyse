@@ -22,9 +22,11 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
 import backtype.storm.utils.Utils;
+import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.statustext.SplitStatusTextBolt;
 import de.fhb.twitalyse.bolt.statustext.GetStatusTextBolt;
+import de.fhb.twitalyse.bolt.statustext.SplitRetweetCounterBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -112,17 +114,28 @@ public class TwitalyseTopology {
 		
 
 		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret, host, port);
+                
+                //Status Text Topology
 		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
 		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(ignoreList, host, port);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
-
 		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
+                
 		builder.setBolt("getTextBolt", getTextBolt)
-										.shuffleGrouping("twitterStreamSpout");
+                        .shuffleGrouping("twitterStreamSpout");  
 		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
-										.shuffleGrouping("getTextBolt");
+                        .shuffleGrouping("getTextBolt");  
 		builder.setBolt("countWordsBolt", countWordsBolt)
-										.shuffleGrouping("splitStatusTextBolt");
+                        .shuffleGrouping("splitStatusTextBolt");
+                
+                //Retweet Counter Topology 
+                SplitRetweetCounterBolt splitRetweetCounterBolt = new SplitRetweetCounterBolt();
+                CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
+                
+                builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
+                       .shuffleGrouping("twitterStreamSpout");
+                builder.setBolt("countRetweetBolt", countRetweetBolt)
+                       .shuffleGrouping("splitRetweetCounterBolt");
 
 		Config conf = new Config();
 		conf.setDebug(false);
