@@ -16,26 +16,23 @@
  */
 package de.fhb.twitalyse;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import redis.clients.jedis.Jedis;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-import backtype.storm.tuple.Fields;
-import backtype.storm.utils.Utils;
+import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
-import de.fhb.twitalyse.bolt.statustext.SplitStatusTextBolt;
 import de.fhb.twitalyse.bolt.statustext.GetStatusTextBolt;
+import de.fhb.twitalyse.bolt.statustext.SplitRetweetCounterBolt;
+import de.fhb.twitalyse.bolt.statustext.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
@@ -127,15 +124,25 @@ public class TwitalyseTopology {
 		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
 		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
 				"twitterStreamSpout");
-		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt, 3)
+		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
 				.shuffleGrouping("getTextBolt");
 		builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping(
 				"splitStatusTextBolt");
 
+		// Source Bolt
 		builder.setBolt("getStatusSourceBolt", getStatusSourceBolt)
 				.shuffleGrouping("twitterStreamSpout");
 		builder.setBolt("countSourceBolt", countSourceBolt).shuffleGrouping(
 				"getStatusSourceBolt");
+		
+		 // Retweet Counter Topology 
+        SplitRetweetCounterBolt splitRetweetCounterBolt = new SplitRetweetCounterBolt();
+        CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
+        
+        builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
+               .shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countRetweetBolt", countRetweetBolt)
+               .shuffleGrouping("splitRetweetCounterBolt");
 
 		Config conf = new Config();
 		conf.setDebug(false);
