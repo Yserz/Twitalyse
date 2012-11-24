@@ -1,10 +1,13 @@
 # Folder #
 /target/
+/.settings/
 
 # Files #
 .DS_Store
 */.DS_Store
 *.class
+*.classpath
+*.project
 
 # Package Files #
 *.jar
