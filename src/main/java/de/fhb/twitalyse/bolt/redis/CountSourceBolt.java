@@ -26,16 +26,15 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
- * This Bolt gets the Twitter Status Text out of the whole Status.
  *
- * @author Michael Koppen <koppen@fh-brandenburg.de>
+ * @author "ott"
  */
-public class CountWordsBolt extends BaseRichBolt {
+public class CountSourceBolt extends BaseRichBolt {
 
 	private String host;
 	private int port;
 
-	public CountWordsBolt(String host, int port) {
+	public CountSourceBolt(String host, int port) {
 		this.host = host;
 		this.port = port;
 	}
@@ -48,16 +47,15 @@ public class CountWordsBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		String word = input.getString(0);
-		System.out.println("CountWordsBolt Word: " + word);
+		String source = input.getString(1);
+		System.out.println("CountSourceBolt Word: " + source);
 
 
 		try {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 			
-			jedis.hincrBy("words", word, 1L);
-			jedis.incr("#words");
+			jedis.hincrBy("sources", source, 1L);
 			
 			jedis.disconnect();
 		} catch (JedisConnectionException e) {

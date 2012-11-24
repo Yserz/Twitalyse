@@ -16,20 +16,17 @@
  */
 package de.fhb.twitalyse.bolt.statustext;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import com.google.gson.Gson;
-import de.fhb.twitalyse.bolt.Status;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import redis.clients.jedis.Jedis;
 
 /**
  * This Bolt analyses the given Twitter Status Text.
@@ -74,21 +71,16 @@ public class SplitStatusTextBolt extends BaseRichBolt {
 		text = text.trim();
 		List<String> splittedText = Arrays.asList(text.split(" "));
 		
-		Jedis jedis = new Jedis(host, port);
-		jedis.getClient().setTimeout(9999);
-		
 		for (String word : splittedText) {
 			
 			word = word.trim();
 			if (!word.equals("") && word.length()>=3) {
 				
-				jedis.incr("#words");
 				collector.emit(input, new Values(word));
 			}
 		}
 		
 		collector.ack(input);
-		jedis.disconnect();
 	}
 
 	@Override

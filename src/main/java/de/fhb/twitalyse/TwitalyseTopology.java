@@ -22,7 +22,9 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
 import backtype.storm.utils.Utils;
+import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
+import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.statustext.SplitStatusTextBolt;
 import de.fhb.twitalyse.bolt.statustext.GetStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
@@ -37,7 +39,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
- *
+ * 
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class TwitalyseTopology {
@@ -48,20 +50,23 @@ public class TwitalyseTopology {
 		PropertyLoader propLoader = new PropertyLoader();
 
 		// get twitter credentials
-//		Properties twitterProps = propLoader.loadSystemProperty("twitterProps.properties");
-//		String consumerKey = twitterProps.getProperty("consumerKey");
-//		String consumerKeySecure = twitterProps.getProperty("consumerKeySecure");
-//		String token = twitterProps.getProperty("token");
-//		String tokenSecret = twitterProps.getProperty("tokenSecret");
+		// Properties twitterProps =
+		// propLoader.loadSystemProperty("twitterProps.properties");
+		// String consumerKey = twitterProps.getProperty("consumerKey");
+		// String consumerKeySecure =
+		// twitterProps.getProperty("consumerKeySecure");
+		// String token = twitterProps.getProperty("token");
+		// String tokenSecret = twitterProps.getProperty("tokenSecret");
 
-		String consumerKey = "";
-		String consumerKeySecure = "";
-		String token = "";
-		String tokenSecret = "";
+		String consumerKey = "XofYnF58nnR1fBIwGq3dQ";
+		String consumerKeySecure = "XtXFcPUzhjQAoDTRQTA7jm3Pw2m3IRX1fDf3kALqBUg";
+		String token = "403358935-CXqlVYe8nKLBm9buxU55vES9HSBdgG5fbCLfOo";
+		String tokenSecret = "2W6d3aNWLYTLcxWCsXDoBesDsiJADh7B0iWxERa9AnU";
 
 		// get ignoredWords
-//		String ignoreWords = propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
-//		List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
+		// String ignoreWords =
+		// propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
+		// List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
 
 		List<String> ignoreList = new ArrayList<String>();
 		ignoreList.add("\\.");
@@ -85,75 +90,85 @@ public class TwitalyseTopology {
 		ignoreList.add("8");
 		ignoreList.add("9");
 
+		// Properties redisProps =
+		// propLoader.loadSystemProperty("redisProps.properties");
+		// String host = redisProps.getProperty("host");
+		// int port = Integer.valueOf(redisProps.getProperty("port"));
 
-//		Properties redisProps = propLoader.loadSystemProperty("redisProps.properties");
-//		String host = redisProps.getProperty("host");
-//		int port = Integer.valueOf(redisProps.getProperty("port"));
-
-		String host = "";
+		String host = "ec2-46-137-129-146.eu-west-1.compute.amazonaws.com";
 		int port = 6379;
-		
+
 		Jedis jedis = new Jedis(host, port);
 		jedis.getClient().setTimeout(9999);
-		
-//		#########################################################
-//		#					Jedis Key´s							#
-//		#########################################################
-//		#	Name	#	Typ		#	Desc						#
-//		#########################################################
-//		#			#			#								#
-//		#	words	#	HashMap	#	Counts all words.			#
-//		#	#stati	#	K, V	#	Counts all stati.			#
-//		#	#words	#	K, V	#	Counts all words.			#
-//		#			#			#								#
-//		#########################################################
-//		#														#
-//		#########################################################
-		
 
-		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(consumerKey, consumerKeySecure, token, tokenSecret, host, port);
+		// #########################################################
+		// # Jedis Key´s #
+		// #########################################################
+		// # Name # Typ # Desc #
+		// #########################################################
+		// # # # #
+		// # words # HashMap # Counts all words. #
+		// # #stati # K, V # Counts all stati. #
+		// # #words # K, V # Counts all words. #
+		// # # # #
+		// #########################################################
+		// # #
+		// #########################################################
+
+		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(
+				consumerKey, consumerKeySecure, token, tokenSecret, host, port);
 		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
-		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(ignoreList, host, port);
+		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(
+				ignoreList, host, port);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
+		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
+		CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
 
 		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
-		builder.setBolt("getTextBolt", getTextBolt)
-										.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
-										.shuffleGrouping("getTextBolt");
-		builder.setBolt("countWordsBolt", countWordsBolt)
-										.shuffleGrouping("splitStatusTextBolt");
+		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
+				"twitterStreamSpout");
+		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt, 3)
+				.shuffleGrouping("getTextBolt");
+		builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping(
+				"splitStatusTextBolt");
+
+		builder.setBolt("getStatusSourceBolt", getStatusSourceBolt)
+				.shuffleGrouping("twitterStreamSpout");
+		builder.setBolt("countSourceBolt", countSourceBolt).shuffleGrouping(
+				"getStatusSourceBolt");
 
 		Config conf = new Config();
 		conf.setDebug(false);
 
-
 		if (args != null && args.length > 0) {
 			conf.setNumWorkers(3);
 
-			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+			StormSubmitter.submitTopology(args[0], conf,
+					builder.createTopology());
 		} else {
 			conf.setMaxTaskParallelism(3);
 
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());
 
-			Utils.sleep(30000);
+			Thread.sleep(10000);
 
 			cluster.shutdown();
-			
-			
+
 			Map<String, String> words = jedis.hgetAll("words");
 
-			System.out.println("################################################");
+			System.out
+					.println("################################################");
 			if (words != null && !words.isEmpty()) {
 				for (Map.Entry<String, String> entry : words.entrySet()) {
-					System.out.println(">>\t\t" + entry.getKey() + "\t\t=\t\t" + entry.getValue());
+					System.out.println(">>\t\t" + entry.getKey() + "\t\t=\t\t"
+							+ entry.getValue());
 				}
 			}
-			System.out.println("################################################");
+			System.out
+					.println("################################################");
 		}
-		
+
 		jedis.disconnect();
 	}
 }
