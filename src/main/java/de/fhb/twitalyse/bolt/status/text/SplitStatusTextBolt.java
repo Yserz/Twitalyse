@@ -27,6 +27,7 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import redis.clients.jedis.Jedis;
 
 /**
  * This Bolt analyses the given Twitter Status Text.
@@ -71,16 +72,21 @@ public class SplitStatusTextBolt extends BaseRichBolt {
 		text = text.trim();
 		List<String> splittedText = Arrays.asList(text.split(" "));
 		
+		Jedis jedis = new Jedis(host, port);
+		jedis.getClient().setTimeout(9999);
+		
 		for (String word : splittedText) {
 			
 			word = word.trim();
 			if (!word.equals("") && word.length()>=3) {
 				
+				jedis.incr("#words_full");
 				collector.emit(input, new Values(id, word));
 			}
 		}
 		
 		collector.ack(input);
+		jedis.disconnect();
 	}
 
 	@Override

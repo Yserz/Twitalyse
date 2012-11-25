@@ -52,7 +52,7 @@ public class CountWordsBolt extends BaseRichBolt {
 			jedis.getClient().setTimeout(9999);
 			
 			jedis.hincrBy("words", word, 1L);
-			jedis.incr("#words");
+			jedis.incr("#words_filtered");
 			
 			jedis.disconnect();
 		} catch (JedisConnectionException e) {
