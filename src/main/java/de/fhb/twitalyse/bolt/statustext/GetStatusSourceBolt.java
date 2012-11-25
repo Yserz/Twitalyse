@@ -26,6 +26,8 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.utils.TwitterUtils;
+
 import java.util.Map;
 
 /**
@@ -53,8 +55,10 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 			Status ts = gson.fromJson(json, Status.class);
 
 			System.out.println("GetStatusSourceBolt Extracted Source Text: " + ts.source);
+			
+			String source = TwitterUtils.findSource(ts.source);
 
-			collector.emit(input, new Values(id, ts.source));
+			collector.emit(input, new Values(id, source));
 			collector.ack(input);
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");
