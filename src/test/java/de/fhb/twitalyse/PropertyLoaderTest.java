@@ -19,30 +19,19 @@ package de.fhb.twitalyse;
 import java.util.Properties;
 import java.util.Set;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  *
  * @author MacYser
  */
-public class PropertyLoaderTest extends TestCase {
+public class PropertyLoaderTest {
 	
-	public PropertyLoaderTest(String testName) {
-		super(testName);
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-	
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
 
 	/**
 	 * Test of loadSystemProperty method, of class PropertyLoader.
 	 */
+	@Test
 	public void testLoadSystemProperty() throws Exception {
 		System.out.println("loadSystemProperty");
 		

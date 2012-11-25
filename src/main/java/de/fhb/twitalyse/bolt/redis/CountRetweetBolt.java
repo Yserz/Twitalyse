@@ -47,7 +47,9 @@ public class CountRetweetBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long counter = input.getLong(0);
+		long id = input.getLong(0);
+		// TODO could be null and crash @see GetStatusRetweetetCountBolt.java
+		long counter = input.getLong(1);
 		System.out.println("CountRetweetBolt : " + counter);
 
 		try {
@@ -69,6 +71,5 @@ public class CountRetweetBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		// declarer.declare(new Fields("id", "text"));
 	}
 }

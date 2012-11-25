@@ -28,15 +28,15 @@ import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
-import de.fhb.twitalyse.bolt.statustext.GetStatusSourceBolt;
-import de.fhb.twitalyse.bolt.statustext.GetStatusTextBolt;
-import de.fhb.twitalyse.bolt.statustext.GetStatusRetweetCountBolt;
-import de.fhb.twitalyse.bolt.statustext.SplitStatusTextBolt;
+import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
+import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
+import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
+import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
- * 
+ *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class TwitalyseTopology {
@@ -55,12 +55,11 @@ public class TwitalyseTopology {
 		// String token = twitterProps.getProperty("token");
 		// String tokenSecret = twitterProps.getProperty("tokenSecret");
 
-		
-		// Von nen TwitterBot, also wayne
-		String consumerKey = "nWFE2fbPkOHH9RDa1gIUfw";
-		String consumerKeySecure = "DZ1SX9JcGkGiuUNIMPaXQAROXqCei0N7a0tHYoTI";
-		String token = "405566320-d7swfKTwiePNSsrDLpcVyDAFNQN4jX2ybwIxLyOw";
-		String tokenSecret = "o0d56crKfIgCTyeEymelAPmSFCydCMaRQB320U95o";
+
+		String consumerKey = "";
+		String consumerKeySecure = "";
+		String token = "";
+		String tokenSecret = "";
 
 		// get ignoredWords
 		// String ignoreWords =
@@ -94,63 +93,64 @@ public class TwitalyseTopology {
 		// String host = redisProps.getProperty("host");
 		// int port = Integer.valueOf(redisProps.getProperty("port"));
 
-		String host = "ec2-46-137-129-146.eu-west-1.compute.amazonaws.com";
+		String host = "host";
 		int port = 6379;
 
 		Jedis jedis = new Jedis(host, port);
 		jedis.getClient().setTimeout(9999);
 
-		// #########################################################
-		// # Jedis Key´s #
-		// #########################################################
-		// # Name # Typ # Desc #
-		// #########################################################
-		// # # # #
-		// # words # HashMap # Counts all words. #
-		// # #stati # K, V # Counts all stati. #
-		// # #words # K, V # Counts all words. #
-		// # # # #
-		// #########################################################
-		// # #
-		// #########################################################
+//		#########################################################
+//		#					Jedis Key´s							#
+//		#########################################################
+//		#	Name	#	Typ		#	Desc						#
+//		#########################################################
+//		#			#			#								#
+//		#	words	#	HashMap	#	Counts all words.			#
+//		#	#stati	#	K, V	#	Counts all stati.			#
+//		#	#words	#	K, V	#	Counts all words.			#
+//		#			#			#								#
+//		#########################################################
+//		#														#
+//		#########################################################
 
+		// TwitterSpout
 		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(
 				consumerKey, consumerKeySecure, token, tokenSecret, host, port);
+
+		// WordCount
 		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
 		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(
 				ignoreList, host, port);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
+
+		// Source Bolt
 		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
 		CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
+		
+		// Retweet Counter
+		GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
+		CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
 
 		// WordCount
 		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
-		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
-				"twitterStreamSpout");
-
-		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
-				"twitterStreamSpout");
+		builder.setBolt("getTextBolt", getTextBolt)
+				.shuffleGrouping("twitterStreamSpout");
 		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
 				.shuffleGrouping("getTextBolt");
-		builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping(
-				"splitStatusTextBolt");
+		builder.setBolt("countWordsBolt", countWordsBolt)
+				.shuffleGrouping("splitStatusTextBolt");
 
 		// Source Bolt
 		builder.setBolt("getStatusSourceBolt", getStatusSourceBolt)
 				.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("countSourceBolt", countSourceBolt).shuffleGrouping(
-				"getStatusSourceBolt");
+		builder.setBolt("countSourceBolt", countSourceBolt)
+				.shuffleGrouping("getStatusSourceBolt");
 
-		// Retweet Counter Topology
-		GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
-		CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
-
+		// Retweet Counter
 		builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
 				.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("countRetweetBolt", countRetweetBolt).shuffleGrouping(
-				"splitRetweetCounterBolt");
-		builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping(
-				"splitStatusTextBolt");
+		builder.setBolt("countRetweetBolt", countRetweetBolt)
+				.shuffleGrouping("splitRetweetCounterBolt");
 
 		Config conf = new Config();
 		conf.setDebug(false);

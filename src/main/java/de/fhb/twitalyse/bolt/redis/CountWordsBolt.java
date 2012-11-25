@@ -40,15 +40,10 @@ public class CountWordsBolt extends BaseRichBolt {
 		this.port = port;
 	}
 
-	
-
-	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-	}
-
 	@Override
 	public void execute(Tuple input) {
-		String word = input.getString(0);
+		long id = input.getLong(0);
+		String word = input.getString(1);
 		System.out.println("CountWordsBolt Word: " + word);
 
 
@@ -70,6 +65,12 @@ public class CountWordsBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-//		declarer.declare(new Fields("id", "text"));
+		
 	}
+
+	@Override
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		
+	}
+
 }

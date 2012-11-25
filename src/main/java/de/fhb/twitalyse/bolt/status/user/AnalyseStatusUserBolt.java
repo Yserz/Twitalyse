@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.statususer;
+package de.fhb.twitalyse.bolt.status.user;
 
 /**
  * This Bolt analyses the Twitter User who postet the Twitter Status.

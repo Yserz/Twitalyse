@@ -14,40 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.statustext;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+package de.fhb.twitalyse.bolt.status.text;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import com.google.gson.Gson;
+import de.fhb.twitalyse.bolt.Status;
+import java.util.Map;
 
 /**
- * This Bolt analyses the given Twitter Status Text.
- * 
+ * This Bolt gets the Twitter Status Text out of the whole Status.
+ *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class SplitStatusTextBolt extends BaseRichBolt {
+public class GetStatusTextBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
-	private List<String> ignoreWords;
-	private String host;
-	private int port;
 
-	public SplitStatusTextBolt(List<String> ignoreWords, String host, int port) {
-		this.ignoreWords = ignoreWords;
-		this.host = host;
-		this.port = port;
-	}
-
-	
-	
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
@@ -56,35 +45,33 @@ public class SplitStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("AnalyseStatusTextBolt Status ID: "+id);
-		String text = input.getString(1);
-		System.out.println("AnalyseStatusTextBolt Text: "+text);
-		
-		text = text.toLowerCase();
-		//Clean up text
-		for (String wordToIgnore : ignoreWords) {
-			text = text.replaceAll(wordToIgnore, "");
+		System.out.println("GetStatusTextBolt Status ID: " + id);
+		String json = input.getString(1);
+//		System.out.println("GetStatusTextBolt JSON: "+json);
+
+		try {
+			Gson gson = new Gson();
+			Status ts = gson.fromJson(json, Status.class);
+
+			System.out.println("GetStatusTextBolt Extracted Status Text: " + ts.text);
+
+			collector.emit(input, new Values(id, ts.text));
+			collector.ack(input);
+		} catch (RuntimeException re) {
+			System.out.println("########################################################");
+			System.out.println("Exception: "+re);
+			System.out.println("JSON: "+json);
+			System.out.println("########################################################");
 		}
-		System.out.println("AnalyseStatusTextBolt filtered Text: "+text);
-		
-		//Split text
-		text = text.trim();
-		List<String> splittedText = Arrays.asList(text.split(" "));
-		
-		for (String word : splittedText) {
-			
-			word = word.trim();
-			if (!word.equals("") && word.length()>=3) {
-				
-				collector.emit(input, new Values(word));
-			}
-		}
-		
-		collector.ack(input);
+
 	}
 
+//	@Override
+//	public void cleanup() {
+//		
+//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("word"));
-	}	
+		declarer.declare(new Fields("id", "text"));
+	}
 }

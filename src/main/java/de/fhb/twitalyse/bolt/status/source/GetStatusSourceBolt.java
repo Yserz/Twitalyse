@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Andy Klay
+ * Copyright (C) 2012 Michael Koppen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.statustext;
+package de.fhb.twitalyse.bolt.status.source;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
@@ -25,49 +26,55 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.utils.TwitterUtils;
+
 import java.util.Map;
 
 /**
- * This Bolt gets the Twitter Retweet Count out of the whole Status.
- * 
- * @author Andy Klay <klay@fh-brandenburg.de>
+ * This Bolt gets the Twitter Status Source out of the whole Status.
+ *
+ * @author "ott"
  */
-public class GetStatusRetweetCountBolt extends BaseRichBolt {
+public class GetStatusSourceBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
 
 	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("retweets"));
-	}
-
-	@Override
-	public void prepare(Map stormConf, TopologyContext context,
-			OutputCollector collector) {
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 	}
 
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("SplitRetweetCountBolt Status ID: " + id);
+		System.out.println("GetStatusSourceBolt Status ID: " + id);
 		String json = input.getString(1);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
-			System.out.println("SplitRetweetCountBolt Retweet Status : "
-					+ ts.retweet_count);
 
-			collector.emit(input, new Values(ts.retweet_count));
+			System.out.println("GetStatusSourceBolt Extracted Source Text: " + ts.source);
+			
+			String source = TwitterUtils.findSource(ts.source);
+
+			collector.emit(input, new Values(id, source));
 			collector.ack(input);
 		} catch (RuntimeException re) {
-			System.out
-					.println("########################################################");
-			System.out.println("Exception: " + re);
-			System.out.println("JSON: " + json);
-			System.out
-					.println("########################################################");
+			System.out.println("########################################################");
+			System.out.println("Exception: "+re);
+			System.out.println("JSON: "+json);
+			System.out.println("########################################################");
 		}
+
+	}
+
+//	@Override
+//	public void cleanup() {
+//		
+//	}
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("id", "text"));
 	}
 }
