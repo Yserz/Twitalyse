@@ -1,13 +1,8 @@
 package de.fhb.twitalyse;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Locale;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 /**
  * This class loads various Property-Files.
@@ -24,20 +19,11 @@ public class PropertyLoader {
 	 * @throws IOException
 	 */
 	public Properties loadSystemProperty(String path) throws IOException {
-		Properties props;
+		Properties props = new Properties();
 		try {
-//			ClassLoader loader = ClassLoader.getSystemClassLoader();
-//			InputStream in = loader.getResourceAsStream(path);
-			File f;
-			f = new File(System.getProperty(path));
-			if (f.isFile()) {
-				System.out.println(path+ " gefunden!");
-			}
-			props = loadSystemProperty(path);
-			if (props != null) {
-				System.out.println("Property gefunden!");
-			}
-			
+			ClassLoader loader = PropertyLoader.class.getClassLoader();
+			InputStream in = loader.getResourceAsStream(path);
+			props.load(in);
 			
 		} finally {
 			//May set some default values.

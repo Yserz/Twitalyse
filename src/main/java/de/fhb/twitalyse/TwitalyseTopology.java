@@ -16,9 +16,7 @@
  */
 package de.fhb.twitalyse;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import redis.clients.jedis.Jedis;
 import backtype.storm.Config;
@@ -33,6 +31,7 @@ import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -49,52 +48,22 @@ public class TwitalyseTopology {
 
 		// get twitter credentials
 		Properties twitterProps = propLoader.loadSystemProperty("twitterProps.properties");
-		// String consumerKey = twitterProps.getProperty("consumerKey");
-		// String consumerKeySecure =
-		// twitterProps.getProperty("consumerKeySecure");
-		// String token = twitterProps.getProperty("token");
-		// String tokenSecret = twitterProps.getProperty("tokenSecret");
+		String consumerKey = twitterProps.getProperty("consumerKey");
+		String consumerKeySecure = twitterProps.getProperty("consumerKeySecure");
+		String token = twitterProps.getProperty("token");
+		String tokenSecret = twitterProps.getProperty("tokenSecret");
 
-
-		String consumerKey = "";
-		String consumerKeySecure = "";
-		String token = "";
-		String tokenSecret = "";
 
 		// get ignoredWords
-		// String ignoreWords =
-		// propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
-		// List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
+		String ignoreWords = propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
+		List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
 
-		List<String> ignoreList = new ArrayList<String>();
-		ignoreList.add("\\.");
-		ignoreList.add("-");
-		ignoreList.add(",");
-		ignoreList.add("!");
-		ignoreList.add("\\?");
-		ignoreList.add(":");
-		ignoreList.add(";");
-		ignoreList.add("'");
-		ignoreList.add("\\|");
-		ignoreList.add("%");
-		ignoreList.add("0");
-		ignoreList.add("1");
-		ignoreList.add("2");
-		ignoreList.add("3");
-		ignoreList.add("4");
-		ignoreList.add("5");
-		ignoreList.add("6");
-		ignoreList.add("7");
-		ignoreList.add("8");
-		ignoreList.add("9");
 
-		// Properties redisProps =
-		// propLoader.loadSystemProperty("redisProps.properties");
-		// String host = redisProps.getProperty("host");
-		// int port = Integer.valueOf(redisProps.getProperty("port"));
+		// get redis configuration
+		Properties redisProps =	propLoader.loadSystemProperty("redisProps.properties");
+		String host = redisProps.getProperty("host");
+		int port = Integer.valueOf(redisProps.getProperty("port"));
 
-		String host = "";
-		int port = 6379;
 
 		Jedis jedis = new Jedis(host, port);
 		jedis.getClient().setTimeout(9999);
@@ -126,7 +95,7 @@ public class TwitalyseTopology {
 		// Source Bolt
 		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
 		CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
-		
+
 		// Retweet Counter
 		GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
 		CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
@@ -155,21 +124,21 @@ public class TwitalyseTopology {
 		Config conf = new Config();
 		conf.setDebug(false);
 
-//		if (args != null && args.length > 0) {
-//			conf.setNumWorkers(3);
-//
-//			StormSubmitter.submitTopology(args[0], conf,
-//					builder.createTopology());
-//		} else {
-//			conf.setMaxTaskParallelism(3);
-//
-//			LocalCluster cluster = new LocalCluster();
-//			cluster.submitTopology("twitalyse", conf, builder.createTopology());
-//
-//			Thread.sleep(10000);
-//
-//			cluster.shutdown();
-//		}
+		if (args != null && args.length > 0) {
+			conf.setNumWorkers(3);
+
+			StormSubmitter.submitTopology(args[0], conf,
+					builder.createTopology());
+		} else {
+			conf.setMaxTaskParallelism(3);
+
+			LocalCluster cluster = new LocalCluster();
+			cluster.submitTopology("twitalyse", conf, builder.createTopology());
+
+			Thread.sleep(10000);
+
+			cluster.shutdown();
+		}
 
 		jedis.disconnect();
 	}
