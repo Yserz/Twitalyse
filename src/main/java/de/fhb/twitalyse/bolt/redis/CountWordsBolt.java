@@ -51,7 +51,9 @@ public class CountWordsBolt extends BaseRichBolt {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 			
-			jedis.hincrBy("words", word, 1L);
+			jedis.zincrby("words", 1, word);
+			
+//			jedis.hincrBy("words", word, 1L);
 			jedis.incr("#words_filtered");
 			
 			jedis.disconnect();
