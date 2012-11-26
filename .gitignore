@@ -14,3 +14,4 @@
 *.war
 *.ear
 /src/main/resources/twitterProps.properties
+/src/main/resources/redisProps.properties
