@@ -24,11 +24,19 @@ public class PropertyLoader {
 	 * @throws IOException
 	 */
 	public Properties loadSystemProperty(String path) throws IOException {
-		Properties props = new Properties();
+		Properties props;
 		try {
-			ClassLoader loader = ClassLoader.getSystemClassLoader();
-			InputStream in = loader.getResourceAsStream(path);
-			props.load(in);
+//			ClassLoader loader = ClassLoader.getSystemClassLoader();
+//			InputStream in = loader.getResourceAsStream(path);
+			File f;
+			f = new File(System.getProperty(path));
+			if (f.isFile()) {
+				System.out.println(path+ " gefunden!");
+			}
+			props = loadSystemProperty(path);
+			if (props != null) {
+				System.out.println("Property gefunden!");
+			}
 			
 			
 		} finally {

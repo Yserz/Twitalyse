@@ -33,6 +33,7 @@ import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
+import java.util.Properties;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
@@ -47,8 +48,7 @@ public class TwitalyseTopology {
 		PropertyLoader propLoader = new PropertyLoader();
 
 		// get twitter credentials
-		// Properties twitterProps =
-		// propLoader.loadSystemProperty("twitterProps.properties");
+		Properties twitterProps = propLoader.loadSystemProperty("twitterProps.properties");
 		// String consumerKey = twitterProps.getProperty("consumerKey");
 		// String consumerKeySecure =
 		// twitterProps.getProperty("consumerKeySecure");
@@ -93,7 +93,7 @@ public class TwitalyseTopology {
 		// String host = redisProps.getProperty("host");
 		// int port = Integer.valueOf(redisProps.getProperty("port"));
 
-		String host = "host";
+		String host = "";
 		int port = 6379;
 
 		Jedis jedis = new Jedis(host, port);
@@ -155,21 +155,21 @@ public class TwitalyseTopology {
 		Config conf = new Config();
 		conf.setDebug(false);
 
-		if (args != null && args.length > 0) {
-			conf.setNumWorkers(3);
-
-			StormSubmitter.submitTopology(args[0], conf,
-					builder.createTopology());
-		} else {
-			conf.setMaxTaskParallelism(3);
-
-			LocalCluster cluster = new LocalCluster();
-			cluster.submitTopology("twitalyse", conf, builder.createTopology());
-
-			Thread.sleep(10000);
-
-			cluster.shutdown();
-		}
+//		if (args != null && args.length > 0) {
+//			conf.setNumWorkers(3);
+//
+//			StormSubmitter.submitTopology(args[0], conf,
+//					builder.createTopology());
+//		} else {
+//			conf.setMaxTaskParallelism(3);
+//
+//			LocalCluster cluster = new LocalCluster();
+//			cluster.submitTopology("twitalyse", conf, builder.createTopology());
+//
+//			Thread.sleep(10000);
+//
+//			cluster.shutdown();
+//		}
 
 		jedis.disconnect();
 	}
