@@ -50,13 +50,11 @@ public class CountSourceBolt extends BaseRichBolt {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 			
-			jedis.hincrBy("sources", source, 1L);
+			jedis.zincrby("sources", 1, source);
 			
 			jedis.disconnect();
 		} catch (JedisConnectionException e) {
-			System.out.println("################################################");
 			System.out.println("Exception: " + e);
-			System.out.println("################################################");
 		}
 
 	}
