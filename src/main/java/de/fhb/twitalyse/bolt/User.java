@@ -1,64 +1,43 @@
-/*
- * Copyright (C) 2012 Michael Koppen
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+
 package de.fhb.twitalyse.bolt;
 
-/**
- * 
- * @author Michael Koppen <koppen@fh-brandenburg.de>
- */
 public class User{
-   	public Boolean contributors_enabled;
+   	public boolean contributors_enabled;
    	public String created_at;
-   	public Boolean default_profile;
-   	public Boolean default_profile_image;
+   	public boolean default_profile;
+   	public boolean default_profile_image;
    	public String description;
-   	public Long favourites_count;
-   	public String follow_request_sent;
-   	public Long followers_count;
-   	public String following;
-   	public Long friends_count;
-   	public Boolean geo_enabled;
-   	public Long id;
+   	public int favourites_count;
+   	public boolean follow_request_sent;
+   	public int followers_count;
+   	public boolean following;
+   	public int friends_count;
+   	public boolean geo_enabled;
+   	public long id;
    	public String id_str;
-   	public Boolean is_translator;
+   	public boolean is_translator;
    	public String lang;
-   	public Long listed_count;
+   	public int listed_count;
    	public String location;
    	public String name;
-   	public String notifications;
+   	public boolean notifications;
    	public String profile_background_color;
    	public String profile_background_image_url;
    	public String profile_background_image_url_https;
-   	public Boolean profile_background_tile;
-   	public String profile_banner_url;
+   	public boolean profile_background_tile;
    	public String profile_image_url;
    	public String profile_image_url_https;
    	public String profile_link_color;
    	public String profile_sidebar_border_color;
    	public String profile_sidebar_fill_color;
    	public String profile_text_color;
-   	public Boolean profile_use_background_image;
-   	//public Boolean protected;
+   	public boolean profile_use_background_image;
+//   	public boolean protected;
    	public String screen_name;
-   	public Long statuses_count;
+   	public int statuses_count;
    	public String time_zone;
    	public String url;
-   	public Long utc_offset;
-   	public Boolean verified;
+   	public int utc_offset;
+   	public boolean verified;
 
- 	
 }
