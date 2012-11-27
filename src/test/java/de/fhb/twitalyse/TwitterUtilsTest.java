@@ -17,12 +17,10 @@ public class TwitterUtilsTest {
 
 	@Test
 	public void findSourceTest() {
-		assertEquals("cpan.org", TwitterUtils.findSource("http://search.cpan.org/~rosch/URI-Find-0.16/lib/URI/Find.pm"));
-		assertEquals("foo.com", TwitterUtils.findSource("https://foo.com/bar"));
-		assertEquals("google.com", TwitterUtils.findSource("https://mail.google.com/mail/ca"));
-		assertEquals("google.com", TwitterUtils.findSource("https://mail.google.com/mail/ca"));
+		assertEquals("cpan.org", TwitterUtils.findSource("<a href=\"http://search.cpan.org/~rosch/URI-Find-0.16/lib/URI/Find.pm\">cpan.org</a>"));
 		assertEquals("web", TwitterUtils.findSource("web"));
-		assertEquals("android", TwitterUtils.findSource("twitter.com/download/android"));
-		assertEquals("iphone", TwitterUtils.findSource("twitter.com/download/iphone"));
+		assertEquals("Twitter for iPhone", TwitterUtils.findSource("<a href=\"http://twitter.com/download/iPhone\">Twitter for iPhone</a>"));
+		assertEquals("Twitter for Android", TwitterUtils.findSource("<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>"));
+		assertEquals("TweetList!", TwitterUtils.findSource("<a href=\"http://tweetli.st/\" rel=\"nofollow\">TweetList!</a>"));
 	}
 }

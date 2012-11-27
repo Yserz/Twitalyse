@@ -46,32 +46,18 @@ public class TwitterUtils {
 	 * </tbody>
 	 * </table>
 	 * 
-	 * @param url a URL
+	 * @param url
+	 *            a URL
 	 * @return the source
 	 */
 	public static String findSource(String url) {
-		Pattern p = Pattern.compile(".*?([^.]+\\.[^.]+)");
-		try {
-			URI uri = new URI(url);
-			String path = uri.getPath();
-			if (path.contains("twitter.com/download/android")) {
-				return "android";
-			}
-			if (path.contains("twitter.com/download/iphone")) {
-				return "iphone";
-			}
-			if (path.contains("blackberry.com/twitter")) {
-				return "blackberry";
-			}
-			if (uri.getHost() != null) {
-				Matcher m = p.matcher(uri.getHost());
-				return (m.matches()) ? m.group(1) : uri.toString();
-			} else {
-				return uri.toString();
-			}
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		if (url.equals("web")) {
 			return url;
+		}else{
+			Pattern p = Pattern.compile("<.*>(.*)<.*>");
+
+			Matcher m = p.matcher(url);
+			return (m.matches()) ? m.group(1) : url;
 		}
 	}
 }
