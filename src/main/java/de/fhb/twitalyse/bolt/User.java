@@ -2,42 +2,43 @@
 package de.fhb.twitalyse.bolt;
 
 public class User{
-   	public boolean contributors_enabled;
+	//TODO: tighten datatypes Long -> Integer etc. if possible
+   	public Boolean contributors_enabled;
    	public String created_at;
-   	public boolean default_profile;
-   	public boolean default_profile_image;
+   	public Boolean default_profile;
+   	public Boolean default_profile_image;
    	public String description;
-   	public int favourites_count;
-   	public boolean follow_request_sent;
-   	public int followers_count;
-   	public boolean following;
-   	public int friends_count;
-   	public boolean geo_enabled;
-   	public long id;
+   	public Long favourites_count;
+   	public Boolean follow_request_sent;
+   	public Long followers_count;
+   	public Boolean following;
+   	public Long friends_count;
+   	public Boolean geo_enabled;
+   	public Long id;
    	public String id_str;
-   	public boolean is_translator;
+   	public Boolean is_translator;
    	public String lang;
-   	public int listed_count;
+   	public Long listed_count;
    	public String location;
    	public String name;
-   	public boolean notifications;
+   	public Boolean notifications;
    	public String profile_background_color;
    	public String profile_background_image_url;
    	public String profile_background_image_url_https;
-   	public boolean profile_background_tile;
+   	public Boolean profile_background_tile;
    	public String profile_image_url;
    	public String profile_image_url_https;
    	public String profile_link_color;
    	public String profile_sidebar_border_color;
    	public String profile_sidebar_fill_color;
    	public String profile_text_color;
-   	public boolean profile_use_background_image;
-//   	public boolean protected;
+   	public Boolean profile_use_background_image;
+//   	public Boolean protected;
    	public String screen_name;
-   	public int statuses_count;
+   	public Long statuses_count;
    	public String time_zone;
    	public String url;
-   	public int utc_offset;
-   	public boolean verified;
+   	public Long utc_offset;
+   	public Boolean verified;
 
 }

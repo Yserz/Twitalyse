@@ -1,6 +1,6 @@
 
 package de.fhb.twitalyse.bolt;
 
-public class Attributes{
+public class Attribute{
 
 }

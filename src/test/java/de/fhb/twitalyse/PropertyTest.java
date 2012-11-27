@@ -39,6 +39,8 @@ public class PropertyTest{
 		twitterStream.setOAuthAccessToken(givenAccessToken);
 		
 		assertNotNull(twitterStream.getId());
+		twitterStream.cleanUp();
+		twitterStream.shutdown();
 	}
 	@Test
 	public void redisTest() throws IOException{

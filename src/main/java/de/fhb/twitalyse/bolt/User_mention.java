@@ -3,8 +3,8 @@ package de.fhb.twitalyse.bolt;
 
 import java.util.List;
 
-public class User_mentions{
-   	public long id;
+public class User_mention{
+   	public Long id;
    	public String id_str;
    	public List<Integer> indices;
    	public String name;
