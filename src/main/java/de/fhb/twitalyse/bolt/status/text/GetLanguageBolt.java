@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Michael Koppen
+ * Copyright (C) 2012 Andy Klay
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +28,11 @@ import de.fhb.twitalyse.bolt.Status;
 import java.util.Map;
 
 /**
- * This Bolt gets the Twitter Status Text out of the whole Status.
+ * This Bolt gets the Twitter Language Text out of the whole Status.
  *
- * @author Michael Koppen <koppen@fh-brandenburg.de>
+ * @author Andy Klay <klay@fh-brandenburg.de>
  */
-public class GetStatusTextBolt extends BaseRichBolt {
+public class GetLanguageBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
 
@@ -46,15 +46,14 @@ public class GetStatusTextBolt extends BaseRichBolt {
 		long id = input.getLong(0);
 		System.out.println("GetStatusTextBolt Status ID: " + id);
 		String json = input.getString(1);
-//		System.out.println("GetStatusTextBolt JSON: "+json);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			System.out.println("GetStatusTextBolt Extracted Status Text: " + ts.text);
+			System.out.println("GetLanguageBolt Extracted Status Language: " + ts.user.lang);
 
-			collector.emit(input, new Values(id, ts.text));
+			collector.emit(input, new Values(id, ts.user.lang));
 			collector.ack(input);
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");
@@ -65,10 +64,6 @@ public class GetStatusTextBolt extends BaseRichBolt {
 
 	}
 
-//	@Override
-//	public void cleanup() {
-//		
-//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("id", "text"));
