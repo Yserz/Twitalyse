@@ -23,12 +23,14 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
+import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
 import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
+import de.fhb.twitalyse.bolt.status.text.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import java.util.Arrays;
@@ -95,6 +97,10 @@ public class TwitalyseTopology {
 		// Source Bolt
 		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
 		CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
+                
+                // Language Bolt
+		GetLanguageBolt getLanguageBolt = new GetLanguageBolt();
+		CountLanguageBolt countLanguageBolt = new CountLanguageBolt(host, port);
 
 		// Retweet Counter
 		GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
@@ -114,6 +120,12 @@ public class TwitalyseTopology {
 				.shuffleGrouping("twitterStreamSpout");
 		builder.setBolt("countSourceBolt", countSourceBolt)
 				.shuffleGrouping("getStatusSourceBolt");
+                
+                // Language Bolt
+		builder.setBolt("getLanguageBolt", getStatusSourceBolt)
+				.shuffleGrouping("twitterStreamSpout");
+		builder.setBolt("countLanguageBolt", countSourceBolt)
+				.shuffleGrouping("getLanguageBolt");
 
 		// Retweet Counter
 		builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
