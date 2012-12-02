@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.status.text;
+package de.fhb.twitalyse.bolt.status.user;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -28,11 +28,11 @@ import de.fhb.twitalyse.bolt.Status;
 import java.util.Map;
 
 /**
- * This Bolt gets the Twitter Language Text out of the whole Status.
+ * This Bolt gets the Twitter Follower out of the whole Status.
  *
  * @author Andy Klay <klay@fh-brandenburg.de>
  */
-public class GetLanguageBolt extends BaseRichBolt {
+public class GetFollowerBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
 
@@ -44,17 +44,21 @@ public class GetLanguageBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("GetLanguageBolt Status ID: " + id);
+		System.out.println("GetFollowerBolt Status ID: " + id);
 		String json = input.getString(1);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
+                        long followers = ts.user.followers_count;
 
-			System.out.println("GetLanguageBolt Extracted Status Language: " + ts.user.lang);
+			System.out.println("GetFollowerBolt Extracted Status Follower: " + followers);
 
-			collector.emit(input, new Values(id, ts.user.lang));
-			collector.ack(input);
+                        if(followers>0){
+                            collector.emit(input, new Values(id, followers));
+                            collector.ack(input);                            
+                        }
+                        
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");
 			System.out.println("Exception: "+re);
@@ -66,6 +70,6 @@ public class GetLanguageBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("id", "text"));
+		declarer.declare(new Fields("id", "followerCount"));
 	}
 }
