@@ -39,7 +39,7 @@ public class CountLanguageBolt extends BaseRichBolt {
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
 		String language = input.getString(1);
-		System.out.println("CountLanguageBolt Word: " + language);
+		System.out.println("CountLanguageBolt Language: " + language);
 
 		try {
 			Jedis jedis = new Jedis(host, port);
