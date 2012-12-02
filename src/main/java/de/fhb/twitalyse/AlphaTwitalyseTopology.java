@@ -41,25 +41,24 @@ import java.util.Properties;
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
  * 
- * @author Michael Koppen <koppen@fh-brandenburg.de>
+ * @author ott
  */
 public class AlphaTwitalyseTopology {
 
+	private static final String TWITTERSPOUT = "twitterSpout";
 	private TopologyBuilder builder;
 	private String consumerKey;
 	private String consumerKeySecure;
-	private String token;
-	private String tokenSecret;
+	private final int DEFAULTNUMBEROFWORKERS = 3;
 	private List<String> ignoreList;
 	private String redisHost;
 	private int redisPort;
-	private String[] args;
-	private static final String TWITTERSPOUT = "twitterSpout";
+	private String token;
+	private String tokenSecret;
 
-	public AlphaTwitalyseTopology(String[] args) throws IOException {
+	public AlphaTwitalyseTopology() throws IOException {
 		initProperties();
 		initBuilder();
-		this.args = args;
 	}
 
 	private void initBuilder() {
@@ -146,14 +145,27 @@ public class AlphaTwitalyseTopology {
 				"splitStatusTextBolt");
 	}
 
-	public void startTopology() throws AlreadyAliveException,
+	/**
+	 * (args.length == 0) LocalCluster <br>
+	 * args[0] - Name of Topology for Storm ui (String)<br>
+	 * args[1] - Number of workers (int)
+	 * 
+	 * @param args
+	 * @throws AlreadyAliveException
+	 * @throws InvalidTopologyException
+	 * @throws InterruptedException
+	 */
+	public void startTopology(String[] args) throws AlreadyAliveException,
 			InvalidTopologyException, InterruptedException {
 		Config conf = new Config();
 		conf.setDebug(false);
 
 		if (args != null && args.length > 0) {
-			conf.setNumWorkers(3);
-
+			if (args.length > 1) {
+				conf.setNumWorkers(Integer.parseInt(args[1]));
+			} else {
+				conf.setNumWorkers(DEFAULTNUMBEROFWORKERS);
+			}
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		} else {
