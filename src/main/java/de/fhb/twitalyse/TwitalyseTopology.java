@@ -122,9 +122,9 @@ public class TwitalyseTopology {
 				.shuffleGrouping("getStatusSourceBolt");
                 
                 // Language Bolt
-		builder.setBolt("getLanguageBolt", getStatusSourceBolt)
+		builder.setBolt("getLanguageBolt", getLanguageBolt)
 				.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("countLanguageBolt", countSourceBolt)
+		builder.setBolt("countLanguageBolt", countLanguageBolt)
 				.shuffleGrouping("getLanguageBolt");
 
 		// Retweet Counter
