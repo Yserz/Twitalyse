@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.status.retweetcount;
+package de.fhb.twitalyse.bolt.status.user;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -28,41 +28,34 @@ import de.fhb.twitalyse.bolt.Status;
 import java.util.Map;
 
 /**
- * This Bolt gets the Twitter Retweet Count out of the whole Status.
+ * This Bolt gets the Twitter Favorites out of the whole Status.
  *
  * @author Andy Klay <klay@fh-brandenburg.de>
  */
-public class GetStatusRetweetCountBolt extends BaseRichBolt {
+public class GetFavouritesBolt extends BaseRichBolt {
 
     private OutputCollector collector;
 
     @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("id", "retweets"));
-    }
-
-    @Override
-    public void prepare(Map stormConf, TopologyContext context,
-            OutputCollector collector) {
+    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
     }
 
     @Override
     public void execute(Tuple input) {
         long id = input.getLong(0);
-        System.out.println("SplitRetweetCountBolt Status ID: " + id);
+        System.out.println("GetFavoritesBolt Status ID: " + id);
         String json = input.getString(1);
 
         try {
             Gson gson = new Gson();
             Status ts = gson.fromJson(json, Status.class);
-            long retweetCount=ts.retweet_count;
+            long favourites = ts.user.favourites_count;
 
-            System.out.println("SplitRetweetCountBolt Retweet Status : "
-                    + retweetCount);
+            System.out.println("GetFavoritesBolt Extracted Status Favorites: " + favourites);
 
-            if (ts.retweeted) {
-                collector.emit(input, new Values(id, retweetCount));
+            if (favourites > 0) {
+                collector.emit(input, new Values(id, favourites));
                 collector.ack(input);
             }
 
@@ -72,5 +65,11 @@ public class GetStatusRetweetCountBolt extends BaseRichBolt {
             System.out.println("JSON: " + json);
             System.out.println("########################################################");
         }
+
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        declarer.declare(new Fields("id", "text"));
     }
 }

@@ -25,12 +25,17 @@ import java.util.Map;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-public class CountLanguageBolt extends BaseRichBolt {
+/**
+ * This Bolt adds the Twitter Hashtag Count into Redis.
+ * 
+ * @author Andy Klay <koppen@fh-brandenburg.de>
+ */
+public class CountHashtagBolt extends BaseRichBolt {
 
 	private String host;
 	private int port;
 
-	public CountLanguageBolt(String host, int port) {
+	public CountHashtagBolt(String host, int port) {
 		this.host = host;
 		this.port = port;
 	}

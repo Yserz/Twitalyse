@@ -23,15 +23,16 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
-import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
-import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
-import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
+import de.fhb.twitalyse.bolt.redis.*;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
 import de.fhb.twitalyse.bolt.status.text.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
+import de.fhb.twitalyse.bolt.status.user.GetFavouritesBolt;
+import de.fhb.twitalyse.bolt.status.user.GetFollowerBolt;
+import de.fhb.twitalyse.bolt.status.user.GetFriendsBolt;
+import de.fhb.twitalyse.bolt.status.user.GetHashtagBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import java.util.Arrays;
 import java.util.Properties;
@@ -40,35 +41,37 @@ import java.util.Properties;
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
+ * @author Andy Klay <klay@fh-brandenburg.de>
+ * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class TwitalyseTopology {
 
-	public static void main(String[] args) throws Exception {
-		TopologyBuilder builder = new TopologyBuilder();
+    public static void main(String[] args) throws Exception {
+        TopologyBuilder builder = new TopologyBuilder();
 
-		PropertyLoader propLoader = new PropertyLoader();
+        PropertyLoader propLoader = new PropertyLoader();
 
-		// get twitter credentials
-		Properties twitterProps = propLoader.loadSystemProperty("twitterProps.properties");
-		String consumerKey = twitterProps.getProperty("consumerKey");
-		String consumerKeySecure = twitterProps.getProperty("consumerKeySecure");
-		String token = twitterProps.getProperty("token");
-		String tokenSecret = twitterProps.getProperty("tokenSecret");
-
-
-		// get ignoredWords
-		String ignoreWords = propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
-		List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
+        // get twitter credentials
+        Properties twitterProps = propLoader.loadSystemProperty("twitterProps.properties");
+        String consumerKey = twitterProps.getProperty("consumerKey");
+        String consumerKeySecure = twitterProps.getProperty("consumerKeySecure");
+        String token = twitterProps.getProperty("token");
+        String tokenSecret = twitterProps.getProperty("tokenSecret");
 
 
-		// get redis configuration
-		Properties redisProps =	propLoader.loadSystemProperty("redisProps.properties");
-		String host = redisProps.getProperty("host");
-		int port = Integer.valueOf(redisProps.getProperty("port"));
+        // get ignoredWords
+        String ignoreWords = propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
+        List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
 
 
-		Jedis jedis = new Jedis(host, port);
-		jedis.getClient().setTimeout(9999);
+        // get redis configuration
+        Properties redisProps = propLoader.loadSystemProperty("redisProps.properties");
+        String host = redisProps.getProperty("host");
+        int port = Integer.valueOf(redisProps.getProperty("port"));
+
+
+        Jedis jedis = new Jedis(host, port);
+        jedis.getClient().setTimeout(9999);
 
 //		#########################################################
 //		#					Jedis Key´s							#
@@ -84,74 +87,101 @@ public class TwitalyseTopology {
 //		#														#
 //		#########################################################
 
-		// TwitterSpout
-		TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(
-				consumerKey, consumerKeySecure, token, tokenSecret, host, port);
+        // TwitterSpout
+        TwitterStreamSpout twitterStreamSpout = new TwitterStreamSpout(
+                consumerKey, consumerKeySecure, token, tokenSecret, host, port);
 
-		// WordCount
-		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
-		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(
-				ignoreList, host, port);
-		CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
+        // WordCount
+        GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
+        SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(
+                ignoreList, host, port);
+        CountWordsBolt countWordsBolt = new CountWordsBolt(host, port);
 
-		// Source Bolt
-		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
-		CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
-                
-                // Language Bolt
-		GetLanguageBolt getLanguageBolt = new GetLanguageBolt();
-		CountLanguageBolt countLanguageBolt = new CountLanguageBolt(host, port);
+        // Source Bolt
+        GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
+        CountSourceBolt countSourceBolt = new CountSourceBolt(host, port);
 
-		// Retweet Counter
-		GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
-		CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
+        // Language Bolt
+        GetLanguageBolt getLanguageBolt = new GetLanguageBolt();
+        CountLanguageBolt countLanguageBolt = new CountLanguageBolt(host, port);
 
-		// WordCount
-		builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
-		builder.setBolt("getTextBolt", getTextBolt)
-				.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
-				.shuffleGrouping("getTextBolt");
-		builder.setBolt("countWordsBolt", countWordsBolt)
-				.shuffleGrouping("splitStatusTextBolt");
+        // Retweet Counter
+        GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
+        CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
 
-		// Source Bolt
-		builder.setBolt("getStatusSourceBolt", getStatusSourceBolt)
-				.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("countSourceBolt", countSourceBolt)
-				.shuffleGrouping("getStatusSourceBolt");
-                
-                // Language Bolt
-		builder.setBolt("getLanguageBolt", getLanguageBolt)
-				.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("countLanguageBolt", countLanguageBolt)
-				.shuffleGrouping("getLanguageBolt");
+        // Hashtag Counter
+        GetHashtagBolt getHashtagBolt = new GetHashtagBolt();
+        CountHashtagBolt countHashtagBolt = new CountHashtagBolt(host, port);
 
-		// Retweet Counter
-		builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt)
-				.shuffleGrouping("twitterStreamSpout");
-		builder.setBolt("countRetweetBolt", countRetweetBolt)
-				.shuffleGrouping("splitRetweetCounterBolt");
+        // Follower Counter
+        GetFollowerBolt getFollowerBolt = new GetFollowerBolt();
+        CountFollowerBolt countFollowerBolt = new CountFollowerBolt(host, port);
 
-		Config conf = new Config();
-		conf.setDebug(false);
+        // Friends Counter
+        GetFriendsBolt getFriendsBolt = new GetFriendsBolt();
+        CountFriendsBolt countFriendsBolt = new CountFriendsBolt(host, port);
 
-		if (args != null && args.length > 0) {
-			conf.setNumWorkers(3);
+        // Favorites Counter
+        GetFavouritesBolt getFavouritesBolt = new GetFavouritesBolt();
+        CountFavouritesBolt countFavouritesBolt = new CountFavouritesBolt(host, port);
 
-			StormSubmitter.submitTopology(args[0], conf,
-					builder.createTopology());
-		} else {
-			conf.setMaxTaskParallelism(3);
 
-			LocalCluster cluster = new LocalCluster();
-			cluster.submitTopology("twitalyse", conf, builder.createTopology());
+        // WordCount
+        builder.setSpout("twitterStreamSpout", twitterStreamSpout, 1);
+        builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("splitStatusTextBolt", splitStatusTextBolt).shuffleGrouping("getTextBolt");
+        builder.setBolt("countWordsBolt", countWordsBolt).shuffleGrouping("splitStatusTextBolt");
 
-			Thread.sleep(10000);
+        // Source Bolt
+        builder.setBolt("getStatusSourceBolt", getStatusSourceBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countSourceBolt", countSourceBolt).shuffleGrouping("getStatusSourceBolt");
 
-			cluster.shutdown();
-		}
+        // Language Bolt
+        builder.setBolt("getLanguageBolt", getLanguageBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countLanguageBolt", countLanguageBolt).shuffleGrouping("getLanguageBolt");
 
-		jedis.disconnect();
-	}
+        // Hashtag Bolt
+        builder.setBolt("getHashtagBolt", getHashtagBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countHashtagBolt", countHashtagBolt).shuffleGrouping("getHashtagBolt");
+
+        // Follower Bolt
+        builder.setBolt("getFollowerBolt", getFollowerBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countFollowerBolt", countFollowerBolt).shuffleGrouping("getFollowerBolt");
+
+        // Friends Bolt
+        builder.setBolt("getFriendsBolt", getFriendsBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countFriendsBolt", countFriendsBolt).shuffleGrouping("getFriendsBolt");
+
+        // Favorites Bolt
+        builder.setBolt("getFavouritesBolt", getFavouritesBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countFavouritesBolt", countFavouritesBolt).shuffleGrouping("getFavouritesBolt");
+
+
+
+
+        // Retweet Counter
+        builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt).shuffleGrouping("twitterStreamSpout");
+        builder.setBolt("countRetweetBolt", countRetweetBolt).shuffleGrouping("splitRetweetCounterBolt");
+
+        Config conf = new Config();
+        conf.setDebug(false);
+
+        if (args != null && args.length > 0) {
+            conf.setNumWorkers(3);
+
+            StormSubmitter.submitTopology(args[0], conf,
+                    builder.createTopology());
+        } else {
+            conf.setMaxTaskParallelism(3);
+
+            LocalCluster cluster = new LocalCluster();
+            cluster.submitTopology("twitalyse", conf, builder.createTopology());
+
+            Thread.sleep(10000);
+
+            cluster.shutdown();
+        }
+
+        jedis.disconnect();
+    }
 }

@@ -26,16 +26,16 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
- * This Bolt adds the Twitter Retweet Count into Redis.
+ * This Bolt adds the Twitter Follower Count into Redis.
  *
  * @author Andy Klay <koppen@fh-brandenburg.de>
  */
-public class CountRetweetBolt extends BaseRichBolt {
+public class CountFavouritesBolt extends BaseRichBolt {
 
     private String host;
     private int port;
 
-    public CountRetweetBolt(String host, int port) {
+    public CountFavouritesBolt(String host, int port) {
         this.host = host;
         this.port = port;
     }
@@ -48,14 +48,14 @@ public class CountRetweetBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         long id = input.getLong(0);
-        System.out.println("CountRetweetBolt Status ID: " + id);
+        System.out.println("CountFavouritesBolt Status ID: " + id);
         long counter = input.getLong(1);
-        System.out.println("CountRetweetBolt : " + counter);
+        System.out.println("CountFavouritesBolt : " + counter);
 
         try {
             Jedis jedis = new Jedis(host, port);
             jedis.getClient().setTimeout(9999);
-            jedis.incrBy("#retweets", counter);
+            jedis.incrBy("#favourites", counter);
 
             jedis.disconnect();
 
