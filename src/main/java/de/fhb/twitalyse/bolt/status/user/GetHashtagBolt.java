@@ -33,7 +33,7 @@ import java.util.Map;
  *
  * @author Andy Klay <klay@fh-brandenburg.de>
  */
-public class GetHashtagsBolt extends BaseRichBolt {
+public class GetHashtagBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
 
