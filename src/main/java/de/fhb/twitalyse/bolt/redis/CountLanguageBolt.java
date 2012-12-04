@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Michael Koppen
+ * Copyright (C) 2012 Andy Klay
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,28 +25,33 @@ import java.util.Map;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-/**
- *
- * @author Christoph Ott <ott@fh-brandenburg.de>
- */
-public class CountSourceBolt extends BaseRedisBolt {
+public class CountLanguageBolt extends BaseRichBolt {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8367958498374053860L;
+	private String host;
+	private int port;
 
-	public CountSourceBolt(String host, int port) {
-		super(host, port);
+	public CountLanguageBolt(String host, int port) {
+		this.host = host;
+		this.port = port;
 	}
 
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		String source = input.getString(1);
-		System.out.println("CountSourceBolt Word: " + source);
+		String language = input.getString(1);
+		System.out.println("CountLanguageBolt Language: " + language);
 
-		this.zincrBy("sources", 1, source);
+		try {
+			Jedis jedis = new Jedis(host, port);
+			jedis.getClient().setTimeout(9999);
+			
+			jedis.zincrby("languages", 1, language);
+			
+			jedis.disconnect();
+		} catch (JedisConnectionException e) {
+			System.out.println("Exception: " + e);
+		}
+
 	}
 
 	@Override

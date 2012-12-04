@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Michael Koppen
+ * Copyright (C) 2012 Andy Klay
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.status.text;
+package de.fhb.twitalyse.bolt.status.user;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -24,15 +24,16 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
+import de.fhb.twitalyse.bolt.Hashtag;
 import de.fhb.twitalyse.bolt.Status;
 import java.util.Map;
 
 /**
- * This Bolt gets the Twitter Status Text out of the whole Status.
+ * This Bolt gets the Twitter Hashtags out of the whole Status.
  *
- * @author Michael Koppen <koppen@fh-brandenburg.de>
+ * @author Andy Klay <klay@fh-brandenburg.de>
  */
-public class GetStatusTextBolt extends BaseRichBolt {
+public class GetHashtagBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
 
@@ -44,18 +45,20 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("GetStatusTextBolt Status ID: " + id);
+		System.out.println("GetHashtagsBolt Status ID: " + id);
 		String json = input.getString(1);
-//		System.out.println("GetStatusTextBolt JSON: "+json);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			System.out.println("GetStatusTextBolt Extracted Status Text: " + ts.text);
+			System.out.println("GetHashtagsBolt Extracted Hashtag: " + ts.entities.hashtags);
 
-			collector.emit(input, new Values(id, ts.text));
-			collector.ack(input);
+                        for(Hashtag hashtag: ts.entities.hashtags){
+                            collector.emit(input, new Values(id, hashtag.text));
+                            collector.ack(input);
+                        }
+                        
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");
 			System.out.println("Exception: "+re);
@@ -65,10 +68,6 @@ public class GetStatusTextBolt extends BaseRichBolt {
 
 	}
 
-//	@Override
-//	public void cleanup() {
-//		
-//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("id", "text"));

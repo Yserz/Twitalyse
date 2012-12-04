@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.status.text;
+package de.fhb.twitalyse.bolt.status.source;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -25,14 +25,16 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.utils.TwitterUtils;
+
 import java.util.Map;
 
 /**
- * This Bolt gets the Twitter Status Text out of the whole Status.
+ * This Bolt gets the Twitter Status Source out of the whole Status.
  *
- * @author Michael Koppen <koppen@fh-brandenburg.de>
+ * @author Christoph Ott <ott@fh-brandenburg.de>
  */
-public class GetStatusTextBolt extends BaseRichBolt {
+public class GetPlaceBolt extends BaseRichBolt {
 
 	private OutputCollector collector;
 
@@ -44,17 +46,15 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("GetStatusTextBolt Status ID: " + id);
 		String json = input.getString(1);
-//		System.out.println("GetStatusTextBolt JSON: "+json);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
+			
+			String placeName = ts.place.bounding_box.name;
 
-			System.out.println("GetStatusTextBolt Extracted Status Text: " + ts.text);
-
-			collector.emit(input, new Values(id, ts.text));
+			collector.emit(input, new Values(id, placeName));
 			collector.ack(input);
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");
@@ -65,10 +65,6 @@ public class GetStatusTextBolt extends BaseRichBolt {
 
 	}
 
-//	@Override
-//	public void cleanup() {
-//		
-//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("id", "text"));
