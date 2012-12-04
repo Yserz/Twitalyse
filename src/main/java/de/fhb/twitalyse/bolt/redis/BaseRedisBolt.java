@@ -42,6 +42,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis.zincrby(key, score, member);
 		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
+                        e.printStackTrace();
 		}
 	}
 
@@ -55,6 +56,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis.incr(key);
 		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
+                        e.printStackTrace();
 		}
 	}
 
@@ -69,6 +71,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis.incrBy(key, integer);
 		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
+                        e.printStackTrace();
 		}
 	}
 
@@ -83,6 +86,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis.hincrBy(key, field, value);
 		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
+                        e.printStackTrace();
 		}
 	}
 
@@ -97,6 +101,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis.getClient().setTimeout(9999);
 		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
+                        e.printStackTrace();
 		}
 	}
 
@@ -107,6 +112,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis.disconnect();
 		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
+                        e.printStackTrace();
 		}
 	}
 }

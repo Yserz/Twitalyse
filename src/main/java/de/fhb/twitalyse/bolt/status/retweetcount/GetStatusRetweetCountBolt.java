@@ -68,6 +68,7 @@ public class GetStatusRetweetCountBolt extends BaseRichBolt {
 
         } catch (RuntimeException re) {
             System.out.println("########################################################");
+            re.printStackTrace();
             System.out.println("Exception: " + re);
             System.out.println("JSON: " + json);
             System.out.println("########################################################");
