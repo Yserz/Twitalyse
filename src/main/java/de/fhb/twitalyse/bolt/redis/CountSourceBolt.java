@@ -27,16 +27,17 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  *
- * @author "ott"
+ * @author Christoph Ott <ott@fh-brandenburg.de>
  */
-public class CountSourceBolt extends BaseRichBolt {
+public class CountSourceBolt extends BaseRedisBolt {
 
-	private String host;
-	private int port;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8367958498374053860L;
 
 	public CountSourceBolt(String host, int port) {
-		this.host = host;
-		this.port = port;
+		super(host, port);
 	}
 
 	@Override
@@ -45,18 +46,7 @@ public class CountSourceBolt extends BaseRichBolt {
 		String source = input.getString(1);
 		System.out.println("CountSourceBolt Word: " + source);
 
-
-		try {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
-			
-			jedis.zincrby("sources", 1, source);
-			
-			jedis.disconnect();
-		} catch (JedisConnectionException e) {
-			System.out.println("Exception: " + e);
-		}
-
+		this.zIncrBy("sources", 1, source);
 	}
 
 	@Override

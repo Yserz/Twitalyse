@@ -49,7 +49,8 @@ public class AlphaTwitalyseTopology {
 	private TopologyBuilder builder;
 	private String consumerKey;
 	private String consumerKeySecure;
-	private final int DEFAULTNUMBEROFWORKERS = 3;
+	private final int DEFAULT_NUMBEROFWORKERS = 3;
+	private final int BOLT_PARALLELISM = 3;
 	private List<String> ignoreList;
 	private String redisHost;
 	private int redisPort;
@@ -164,7 +165,7 @@ public class AlphaTwitalyseTopology {
 			if (args.length > 1) {
 				conf.setNumWorkers(Integer.parseInt(args[1]));
 			} else {
-				conf.setNumWorkers(DEFAULTNUMBEROFWORKERS);
+				conf.setNumWorkers(DEFAULT_NUMBEROFWORKERS);
 			}
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
@@ -177,6 +178,19 @@ public class AlphaTwitalyseTopology {
 			Thread.sleep(10000);
 
 			cluster.shutdown();
+		}
+	}
+	
+	public static void main(String[] args) throws IOException{
+		AlphaTwitalyseTopology a = new AlphaTwitalyseTopology();
+		try {
+			a.startTopology(args);
+		} catch (AlreadyAliveException e) {
+			e.printStackTrace();
+		} catch (InvalidTopologyException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }
