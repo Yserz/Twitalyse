@@ -43,7 +43,7 @@ public class GetLanguageBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		Long id = input.getLong(0);
+		long id = input.getLong(0);
 		System.out.println("GetLanguageBolt Status ID: " + id);
 		String json = input.getString(1);
 
