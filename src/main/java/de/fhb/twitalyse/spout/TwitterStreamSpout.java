@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisException;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
@@ -44,16 +45,15 @@ import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
 
 /**
- * This Spout connects to the Twitter API and opens up a Stream.
- * The Spout listens for new Twitter Stati posted on the public Twitter Channel 
- * and push it in the System.
+ * This Spout connects to the Twitter API and opens up a Stream. The Spout
+ * listens for new Twitter Stati posted on the public Twitter Channel and push
+ * it in the System.
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	private final static Logger LOGGER = Logger.getLogger(TwitterStreamSpout.class.getName());
-	
 	//Keys die die App identifizieren
 	private final String CONSUMER_KEY;
 	private final String CONSUMER_KEY_SECURE;
@@ -64,7 +64,6 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	private AckFailDelegate ackFailDelegate;
 	private transient SpoutOutputCollector collector;
 	private transient TwitterStream twitterStream;
-	
 	private String host;
 	private int port;
 
@@ -117,28 +116,33 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 		if (value == null) {
 			Utils.sleep(50);
 		} else {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
-			
-			Date today = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+			try {
+				Jedis jedis = new Jedis(host, port);
+				jedis.getClient().setTimeout(9999);
 
-			// Saves # of all stati
-			jedis.incr("#stati");
-			// Saves # of stati today
-			jedis.incr("#stati_"+sdf.format(today));
-			
-			// Status ID + Status-JSON
-			collector.emit(new Values(value.get(0), value.get(1)));
-			
-			jedis.disconnect();
+				Date today = new Date();
+				SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+
+				// Saves # of all stati
+				jedis.incr("#stati");
+				// Saves # of stati today
+				jedis.incr("#stati_" + sdf.format(today));
+
+				// Status ID + Status-JSON
+				collector.emit(new Values(value.get(0), value.get(1)));
+
+				jedis.disconnect();
+			} catch (JedisException e) {
+				System.out.println("Exception: " + e);
+			}
+
 		}
 	}
 
 	@Override
 	public void close() {
 		twitterStream.shutdown();
-		
+
 	}
 
 	@Override

@@ -4,9 +4,9 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 import backtype.storm.topology.base.BaseRichBolt;
 import java.util.Map;
+import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * Some Redis Operations
@@ -40,7 +40,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 	protected void zincrby(String key, double score, String member) {
 		try {
 			jedis.zincrby(key, score, member);
-		} catch (JedisConnectionException e) {
+		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
@@ -53,7 +53,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 	protected void incr(String key) {
 		try {
 			jedis.incr(key);
-		} catch (JedisConnectionException e) {
+		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
@@ -67,7 +67,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 	protected void incrBy(String key, long integer) {
 		try {
 			jedis.incrBy(key, integer);
-		} catch (JedisConnectionException e) {
+		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
@@ -81,7 +81,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 	protected void hincrBy(String key, String field, long value) {
 		try {
 			jedis.hincrBy(key, field, value);
-		} catch (JedisConnectionException e) {
+		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
@@ -95,7 +95,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
-		} catch (JedisConnectionException e) {
+		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
@@ -105,7 +105,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		super.cleanup();
 		try {
 			jedis.disconnect();
-		} catch (JedisConnectionException e) {
+		} catch (JedisException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
