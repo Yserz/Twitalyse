@@ -18,14 +18,13 @@ package de.fhb.twitalyse.utils;
 
 /**
  *
- * @author Christopher Ott
+ * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class CalcCoordinates {
 
 	public static final double EARTH_RADIUS_KM = 6372.8;
-	
 		
-	public boolean isPointInCircle(Point p1, Point p2, double radius){
+	public static boolean isPointInCircle(Point p1, Point p2, double radius){
 		if(distanceInKm(p1, p2) <= radius){
 			return true;
 		}else{
@@ -33,7 +32,7 @@ public class CalcCoordinates {
 		}
 	}
 
-	public double distanceInKm(double lat1, double lon1, double lat2, double lon2) {
+	public static double distanceInKm(double lat1, double lon1, double lat2, double lon2) {
 		double dLat = Math.toRadians(lat2 - lat1);
 		double dLon = Math.toRadians(lon2 - lon1);
 		lat1 = Math.toRadians(lat1);
@@ -44,7 +43,8 @@ public class CalcCoordinates {
 		double c = 2 * Math.asin(Math.sqrt(a));
 		return EARTH_RADIUS_KM * c;
 	}
-	public double distanceInKm(Point p1, Point p2) {
+	
+	public static double distanceInKm(Point p1, Point p2) {
 		return distanceInKm(p1.lat, p1.lng, p2.lat, p2.lng);
 	}
 }
