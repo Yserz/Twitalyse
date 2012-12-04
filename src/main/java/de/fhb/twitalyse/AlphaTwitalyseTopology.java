@@ -68,10 +68,10 @@ public class AlphaTwitalyseTopology {
 		builder = new TopologyBuilder();
 		initTwitterSpout();
 		initWordCount();
-		initSourcCount();
-		initRetweetCount();
-		initLanguageCount();
-		initPlaceCount();
+//		initSourceCount();
+//		initRetweetCount();
+//		initLanguageCount();
+//		initPlaceCount();
 	}
 
 	private void initPlaceCount() {
@@ -127,7 +127,7 @@ public class AlphaTwitalyseTopology {
 				"retweetCounterBolt");
 	}
 
-	private void initSourcCount() {
+	private void initSourceCount() {
 		GetStatusSourceBolt getStatusSourceBolt = new GetStatusSourceBolt();
 		CountSourceBolt countSourceBolt = new CountSourceBolt(redisHost,
 				redisPort);

@@ -27,6 +27,7 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import redis.clients.jedis.Jedis;
@@ -36,21 +37,19 @@ import redis.clients.jedis.Jedis;
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class SplitStatusTextBolt extends BaseRichBolt {
+public class SplitStatusTextBolt extends BaseRedisBolt {
 
 	private OutputCollector collector;
 	private List<String> ignoreWords;
-	private String host;
-	private int port;
 
 	public SplitStatusTextBolt(List<String> ignoreWords, String host, int port) {
+		super(host, port);
 		this.ignoreWords = ignoreWords;
-		this.host = host;
-		this.port = port;
 	}
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		super.prepare(stormConf, context, collector);
 		this.collector = collector;
 	}
 
@@ -72,8 +71,6 @@ public class SplitStatusTextBolt extends BaseRichBolt {
 		text = text.trim();
 		List<String> splittedText = Arrays.asList(text.split(" "));
 
-		Jedis jedis = new Jedis(host, port);
-		jedis.getClient().setTimeout(9999);
 
 		Date today = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
@@ -85,20 +82,19 @@ public class SplitStatusTextBolt extends BaseRichBolt {
 
 
 				// Saves # of all words
-				jedis.incr("#words_full");
+				this.incr("#words_full");
 				// Saves # of words of today
-				jedis.incr("#words_full_" + sdf.format(today));
+				this.incr("#words_full_" + sdf.format(today));
 				
 				collector.emit(input, new Values(id, word));
 			}
 		}
-
 		collector.ack(input);
-		jedis.disconnect();
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		super.declareOutputFields(declarer);
 		declarer.declare(new Fields("id", "word"));
 	}
 }
