@@ -16,14 +16,7 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
-import java.util.Map;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  *
@@ -32,7 +25,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 public class CountSourceBolt extends BaseRedisBolt {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8367958498374053860L;
 
@@ -46,17 +39,6 @@ public class CountSourceBolt extends BaseRedisBolt {
 		String source = input.getString(1);
 		System.out.println("CountSourceBolt Word: " + source);
 
-		this.zincrBy("sources", 1, source);
+		this.zincrby("sources", 1d, source);
 	}
-
-	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		
-	}
-
-	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		
-	}
-
 }

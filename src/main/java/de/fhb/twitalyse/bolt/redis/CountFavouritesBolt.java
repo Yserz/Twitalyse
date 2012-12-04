@@ -16,33 +16,18 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
-import java.util.Map;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * This Bolt adds the Twitter Follower Count into Redis.
  *
  * @author Andy Klay <koppen@fh-brandenburg.de>
  */
-public class CountFavouritesBolt extends BaseRichBolt {
+public class CountFavouritesBolt extends BaseRedisBolt {
 
-    private String host;
-    private int port;
 
     public CountFavouritesBolt(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
-
-    @Override
-    public void prepare(Map stormConf, TopologyContext context,
-            OutputCollector collector) {
+        super(host, port);
     }
 
     @Override
@@ -51,23 +36,7 @@ public class CountFavouritesBolt extends BaseRichBolt {
         System.out.println("CountFavouritesBolt Status ID: " + id);
         long counter = input.getLong(1);
         System.out.println("CountFavouritesBolt : " + counter);
-
-        try {
-            Jedis jedis = new Jedis(host, port);
-            jedis.getClient().setTimeout(9999);
-            jedis.incrBy("#favourites", counter);
-
-            jedis.disconnect();
-
-        } catch (JedisConnectionException e) {
-            System.out.println("################################################");
-            System.out.println("Exception: " + e);
-            System.out.println("################################################");
-        }
-
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		
+		this.incrBy("#favourites", counter);
     }
 }

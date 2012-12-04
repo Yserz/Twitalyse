@@ -1,8 +1,12 @@
 package de.fhb.twitalyse.bolt.redis;
 
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import backtype.storm.topology.base.BaseRichBolt;
+import java.util.Map;
 
 /**
  * Some Redis Operations
@@ -34,7 +38,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 	 * @param score
 	 * @param member
 	 */
-	protected void zincrBy(String key, double score, String member) {
+	protected void zincrby(String key, Double score, String member) {
 		try {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
@@ -45,6 +49,21 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		}
 	}
 
+	/**
+	 * @see Jedis#incr(String)
+	 * 
+	 * @param key
+	 */
+	protected void incr(String key) {
+		try {
+			Jedis jedis = new Jedis(host, port);
+			jedis.getClient().setTimeout(9999);
+			jedis.incr(key);
+			jedis.disconnect();
+		} catch (JedisConnectionException e) {
+			System.out.println("Exception: " + e);
+		}
+	}
 	/**
 	 * @see Jedis#incrBy(String, long)
 	 * 
@@ -77,5 +96,12 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		} catch (JedisConnectionException e) {
 			System.out.println("Exception: " + e);
 		}
+	}
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+	}
+
+	@Override
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 	}
 }

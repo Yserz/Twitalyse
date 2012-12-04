@@ -16,30 +16,19 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class CountWordsBolt extends BaseRichBolt {
-
-	private String host;
-	private int port;
+public class CountWordsBolt extends BaseRedisBolt {
 
 	public CountWordsBolt(String host, int port) {
-		this.host = host;
-		this.port = port;
+		super(host, port);
 	}
 
 	@Override
@@ -49,36 +38,19 @@ public class CountWordsBolt extends BaseRichBolt {
 		System.out.println("CountWordsBolt Word: " + word);
 
 
-		try {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
 
-			Date today = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+		Date today = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
 
-			// Saves all words of today
-			jedis.zincrby("words_"+sdf.format(today), 1, word);
-			// Saves all words
-			jedis.zincrby("words", 1, word);
-			// Saves # of filtered words
-			jedis.incr("#words_filtered");
-			// Saves # of filtered words of today
-			jedis.incr("#words_filtered_"+sdf.format(today));
+		// Saves all words of today
+		this.zincrby("words_" + sdf.format(today), 1d, word);
+		// Saves all words
+		this.zincrby("words", 1d, word);
+		// Saves # of filtered words
+		this.incr("#words_filtered");
+		// Saves # of filtered words of today
+		this.incr("#words_filtered_" + sdf.format(today));
 
-			jedis.disconnect();
-		} catch (JedisConnectionException e) {
-			System.out.println("################################################");
-			System.out.println("Exception: " + e);
-			System.out.println("################################################");
-		}
 
-	}
-
-	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-	}
-
-	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 	}
 }
