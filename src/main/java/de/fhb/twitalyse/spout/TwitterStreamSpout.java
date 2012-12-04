@@ -164,44 +164,56 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 		TwitterException tex = (TwitterException) ex;
 		if (400 == tex.getStatusCode()) {
 			close();
-			System.err.println("Rate limit texceeded. Clients may not make more than " + tex.getRateLimitStatus().getHourlyLimit() + " requests per hour. \nThe ntext reset is " + tex.getRateLimitStatus().getResetTime());
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Rate limit texceeded. Clients may not make more than {0} requests per hour. \nThe ntext reset is {1}", 
+					new Object[]{tex.getRateLimitStatus().getHourlyLimit(), tex.getRateLimitStatus().getResetTime()});
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (401 == tex.getStatusCode()) {
 			close();
-			System.err.println("Authentication credentials were missing or incorrect.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Authentication credentials were missing or incorrect.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (403 == tex.getStatusCode()) {
-			System.err.println("Duplicated status.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Duplicated status.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (404 == tex.getStatusCode()) {
-			System.err.println("The URI requested is invalid or the resource requested, such as a user, does not exists.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "The URI requested is invalid or the resource requested, such as a user, does not exists.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (406 == tex.getStatusCode()) {
-			System.err.println("Request returned - invalid format is specified in the request.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Request returned - invalid format is specified in the request.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (420 == tex.getStatusCode()) {
 			close();
-			System.err.println("Too many logins with your account in a short time.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Too many logins with your account in a short time.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (500 == tex.getStatusCode()) {
-			System.err.println("Something is broken. Please post to the group so the Twitter team can investigate.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Something is broken. Please post to the group so the Twitter team can investigate.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (502 == tex.getStatusCode()) {
 			close();
-			System.err.println("Twitter is down or being upgraded.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Twitter is down or being upgraded.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (503 == tex.getStatusCode()) {
 			close();
-			System.err.println("The Twitter servers are up, but overloaded with requests. Try again later.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "The Twitter servers are up, but overloaded with requests. Try again later.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else if (-1 == tex.getStatusCode()) {
 			close();
-			System.err.println("Can not connect to the internet or the host is down.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Can not connect to the internet or the host is down.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		} else {
 			close();
-			System.err.println("Unknown twitter-error occured.");
-			LOGGER.log(Level.SEVERE, null, tex);
+			LOGGER.log(Level.SEVERE, "Unknown twitter-error occured.");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{tex, tex.getMessage(), tex.getCause()});
 		}
 	}
 
