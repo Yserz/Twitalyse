@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.status.text;
+package de.fhb.twitalyse.bolt.status.user;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;

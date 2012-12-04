@@ -26,7 +26,7 @@ public class CountLanguageBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
+		Long id = input.getLong(0);
 		String language = input.getString(1);
 		System.out.println("CountLanguageBolt Language: " + language);
 

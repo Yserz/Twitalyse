@@ -56,7 +56,7 @@ public class GetStatusRetweetCountBolt extends BaseRichBolt {
         try {
             Gson gson = new Gson();
             Status ts = gson.fromJson(json, Status.class);
-            long retweetCount=ts.retweet_count;
+            Long retweetCount=ts.retweet_count;
 
             System.out.println("SplitRetweetCountBolt Retweet Status : "
                     + retweetCount);

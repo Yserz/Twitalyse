@@ -50,7 +50,7 @@ public class GetFriendsBolt extends BaseRichBolt {
         try {
             Gson gson = new Gson();
             Status ts = gson.fromJson(json, Status.class);
-            long friends = ts.user.friends_count;
+            Long friends = ts.user.friends_count;
 
             System.out.println("GetFriendsBolt Extracted Status Friends: " + friends);
 

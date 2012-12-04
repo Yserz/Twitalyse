@@ -43,7 +43,7 @@ public class GetStatusTextBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
+		Long id = input.getLong(0);
 		System.out.println("GetStatusTextBolt Status ID: " + id);
 		String json = input.getString(1);
 //		System.out.println("GetStatusTextBolt JSON: "+json);

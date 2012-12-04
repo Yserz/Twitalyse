@@ -50,7 +50,7 @@ public class GetFavouritesBolt extends BaseRichBolt {
         try {
             Gson gson = new Gson();
             Status ts = gson.fromJson(json, Status.class);
-            long favourites = ts.user.favourites_count;
+            Long favourites = ts.user.favourites_count;
 
             System.out.println("GetFavoritesBolt Extracted Status Favorites: " + favourites);
 
@@ -70,6 +70,6 @@ public class GetFavouritesBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("id", "text"));
+        declarer.declare(new Fields("id", "favoritesCount"));
     }
 }

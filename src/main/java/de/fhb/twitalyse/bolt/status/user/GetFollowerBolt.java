@@ -50,7 +50,7 @@ public class GetFollowerBolt extends BaseRichBolt {
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
-                        long followers = ts.user.followers_count;
+                        Long followers = ts.user.followers_count;
 
 			System.out.println("GetFollowerBolt Extracted Status Follower: " + followers);
 
