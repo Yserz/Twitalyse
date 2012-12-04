@@ -64,6 +64,7 @@ public class TwitalyseTopology {
         String host = redisProps.getProperty("host");
         int port = Integer.valueOf(redisProps.getProperty("port"));
 
+		
 
         Jedis jedis = new Jedis(host, port);
         jedis.getClient().setTimeout(9999);
