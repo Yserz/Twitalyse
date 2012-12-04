@@ -66,6 +66,6 @@ public class GetLanguageBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("id", "text"));
+		declarer.declare(new Fields("id", "language"));
 	}
 }
