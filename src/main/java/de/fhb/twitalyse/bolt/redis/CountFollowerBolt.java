@@ -16,58 +16,28 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
-import java.util.Map;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * This Bolt adds the Twitter Follower Count into Redis.
  *
  * @author Andy Klay <koppen@fh-brandenburg.de>
  */
-public class CountFollowerBolt extends BaseRichBolt {
+public class CountFollowerBolt extends BaseRedisBolt {
 
-    private String host;
-    private int port;
+	public CountFollowerBolt(String host, int port) {
+		super(host, port);
+	}
 
-    public CountFollowerBolt(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
+	@Override
+	public void execute(Tuple input) {
+		long id = input.getLong(0);
+		System.out.println("CountFollowerBolt Status ID: " + id);
+		long counter = input.getLong(1);
+		System.out.println("CountFollowerBolt : " + counter);
 
-    @Override
-    public void prepare(Map stormConf, TopologyContext context,
-            OutputCollector collector) {
-    }
+		this.incrBy("#follower", counter);
 
-    @Override
-    public void execute(Tuple input) {
-        long id = input.getLong(0);
-        System.out.println("CountFollowerBolt Status ID: " + id);
-        long counter = input.getLong(1);
-        System.out.println("CountFollowerBolt : " + counter);
 
-        try {
-            Jedis jedis = new Jedis(host, port);
-            jedis.getClient().setTimeout(9999);
-            jedis.incrBy("#follower", counter);
-
-            jedis.disconnect();
-
-        } catch (JedisConnectionException e) {
-            System.out.println("################################################");
-            System.out.println("Exception: " + e);
-            System.out.println("################################################");
-        }
-
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    }
+	}
 }

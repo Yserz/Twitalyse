@@ -1,0 +1,5 @@
+Todo:
+
+- Komplexe Topologie
+  - welche?
+- Redis mit Zeitstempel (Analyse eines Tages, Abfragen über mehrere Tage)

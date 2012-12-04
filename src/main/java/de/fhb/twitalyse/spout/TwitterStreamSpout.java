@@ -25,6 +25,8 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.InprocMessaging;
 import backtype.storm.utils.Utils;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +120,14 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 			
+			Date today = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+
+			// Saves # of all stati
 			jedis.incr("#stati");
+			// Saves # of stati today
+			jedis.incr("#stati_"+sdf.format(today));
+			
 			// Status ID + Status-JSON
 			collector.emit(new Values(value.get(0), value.get(1)));
 			

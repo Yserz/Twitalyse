@@ -16,28 +16,17 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
-import java.util.Map;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * This Bolt adds the Twitter Hashtag Count into Redis.
- * 
+ *
  * @author Andy Klay <koppen@fh-brandenburg.de>
  */
-public class CountHashtagBolt extends BaseRichBolt {
-
-	private String host;
-	private int port;
+public class CountHashtagBolt extends BaseRedisBolt {
 
 	public CountHashtagBolt(String host, int port) {
-		this.host = host;
-		this.port = port;
+		super(host, port);
 	}
 
 	@Override
@@ -46,27 +35,7 @@ public class CountHashtagBolt extends BaseRichBolt {
 		String language = input.getString(1);
 		System.out.println("CountLanguageBolt Language: " + language);
 
-		try {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
-			
-			jedis.zincrby("languages", 1, language);
-			
-			jedis.disconnect();
-		} catch (JedisConnectionException e) {
-			System.out.println("Exception: " + e);
-		}
+		this.zincrby("languages", 1d, language);
 
 	}
-
-	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		
-	}
-
-	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		
-	}
-
 }
