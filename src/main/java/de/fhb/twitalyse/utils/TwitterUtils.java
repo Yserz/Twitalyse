@@ -1,7 +1,5 @@
 package de.fhb.twitalyse.utils;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

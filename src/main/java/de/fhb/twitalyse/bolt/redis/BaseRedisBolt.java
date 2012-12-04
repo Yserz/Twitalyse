@@ -10,20 +10,19 @@ import java.util.Map;
 
 /**
  * Some Redis Operations
- * 
+ *
  * @author Christoph Ott <ott@fh-brandenburg.de>
- * 
+ *
  */
 public abstract class BaseRedisBolt extends BaseRichBolt {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -3005326024690433763L;
-
-	protected String host;
-
-	protected int port;
+	private String host;
+	private int port;
+	private transient Jedis jedis;
 
 	protected BaseRedisBolt(String host, int port) {
 		super();
@@ -33,17 +32,14 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 
 	/**
 	 * @see Jedis#zincrby(String, double, String)
-	 * 
+	 *
 	 * @param key
 	 * @param score
 	 * @param member
 	 */
-	protected void zincrby(String key, Double score, String member) {
+	protected void zincrby(String key, double score, String member) {
 		try {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
 			jedis.zincrby(key, score, member);
-			jedis.disconnect();
 		} catch (JedisConnectionException e) {
 			System.out.println("Exception: " + e);
 		}
@@ -51,31 +47,26 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 
 	/**
 	 * @see Jedis#incr(String)
-	 * 
+	 *
 	 * @param key
 	 */
 	protected void incr(String key) {
 		try {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
 			jedis.incr(key);
-			jedis.disconnect();
 		} catch (JedisConnectionException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
+
 	/**
 	 * @see Jedis#incrBy(String, long)
-	 * 
+	 *
 	 * @param key
 	 * @param integer
 	 */
 	protected void incrBy(String key, long integer) {
 		try {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
 			jedis.incrBy(key, integer);
-			jedis.disconnect();
 		} catch (JedisConnectionException e) {
 			System.out.println("Exception: " + e);
 		}
@@ -83,25 +74,39 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 
 	/**
 	 * @see Jedis#hincrBy(String, String, long)
-	 * 
+	 *
 	 * @param key
 	 * @param integer
 	 */
 	protected void hincrBy(String key, String field, long value) {
 		try {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
 			jedis.hincrBy(key, field, value);
-			jedis.disconnect();
 		} catch (JedisConnectionException e) {
 			System.out.println("Exception: " + e);
 		}
 	}
+
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 	}
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		try {
+			jedis = new Jedis(host, port);
+			jedis.getClient().setTimeout(9999);
+		} catch (JedisConnectionException e) {
+			System.out.println("Exception: " + e);
+		}
+	}
+
+	@Override
+	public void cleanup() {
+		super.cleanup();
+		try {
+			jedis.disconnect();
+		} catch (JedisConnectionException e) {
+			System.out.println("Exception: " + e);
+		}
 	}
 }

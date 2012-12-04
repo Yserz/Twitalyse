@@ -33,7 +33,7 @@ import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
-import de.fhb.twitalyse.bolt.status.source.GetPlaceBolt;
+import de.fhb.twitalyse.bolt.status.place.GetPlaceBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.text.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
