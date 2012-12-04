@@ -26,7 +26,6 @@ import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.*;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
-import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
 import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
@@ -101,10 +100,6 @@ public class TwitalyseTopology {
         GetLanguageBolt getLanguageBolt = new GetLanguageBolt();
         CountLanguageBolt countLanguageBolt = new CountLanguageBolt(host, port);
 
-        // Retweet Counter
-        GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
-        CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
-
 
 
         // WordCount
@@ -122,11 +117,6 @@ public class TwitalyseTopology {
         builder.setBolt("countLanguageBolt", countLanguageBolt).shuffleGrouping("getLanguageBolt");
 
         
-
-
-        // Retweet Counter
-        builder.setBolt("splitRetweetCounterBolt", splitRetweetCounterBolt).shuffleGrouping("twitterStreamSpout");
-        builder.setBolt("countRetweetBolt", countRetweetBolt).shuffleGrouping("splitRetweetCounterBolt");
 
         Config conf = new Config();
         conf.setDebug(false);

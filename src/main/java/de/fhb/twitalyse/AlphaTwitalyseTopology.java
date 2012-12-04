@@ -28,10 +28,8 @@ import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
-import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
-import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
@@ -67,7 +65,6 @@ public class AlphaTwitalyseTopology {
 		initTwitterSpout();
 		initWordCount();
 		initSourceCount();
-		initRetweetCount();
 		initLanguageCount();
 	}
 
@@ -101,17 +98,6 @@ public class AlphaTwitalyseTopology {
 				.loadSystemProperty("redisProps.properties");
 		redisHost = redisProps.getProperty("host");
 		redisPort = Integer.valueOf(redisProps.getProperty("port"));
-	}
-
-	private void initRetweetCount() {
-		GetStatusRetweetCountBolt getRetweetCounterBolt = new GetStatusRetweetCountBolt();
-		CountRetweetBolt countRetweetBolt = new CountRetweetBolt(redisHost,
-				redisPort);
-
-		builder.setBolt("retweetCounterBolt", getRetweetCounterBolt)
-				.shuffleGrouping(TWITTERSPOUT);
-		builder.setBolt("countRetweetBolt", countRetweetBolt).shuffleGrouping(
-				"retweetCounterBolt");
 	}
 
 	private void initSourceCount() {
