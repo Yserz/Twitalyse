@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class Status{
 	public List<Long> contributors;
-	public List<Float> coordinates;
+	public Coordinate coordinates;
    	public String created_at;
    	public Entity entities;
    	public Boolean favorited;

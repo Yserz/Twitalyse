@@ -17,6 +17,7 @@
 package de.fhb.twitalyse.bolt;
 
 import java.util.List;
+
 /**
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
@@ -25,7 +26,7 @@ public class Bounding_box{
 //   	public Attributes attributes;
    	public String contry_code;
 //   	public List<Coordinates> coordinates;
-	public List<Float> coordinates;
+//	public List<Coordinate> coordinates;
    	public String country;
    	public String full_name;
    	public String id;

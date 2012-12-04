@@ -6,6 +6,8 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import redis.clients.jedis.Jedis;
 import backtype.storm.topology.base.BaseRichBolt;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import redis.clients.jedis.exceptions.JedisException;
 
 /**
@@ -15,7 +17,7 @@ import redis.clients.jedis.exceptions.JedisException;
  *
  */
 public abstract class BaseRedisBolt extends BaseRichBolt {
-
+	private final static Logger LOGGER = Logger.getLogger(BaseRedisBolt.class.getName());
 	/**
 	 *
 	 */
@@ -41,7 +43,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.zincrby(key, score, member);
 		} catch (JedisException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
 		}
 	}
 
@@ -54,7 +56,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incr(key);
 		} catch (JedisException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
 		}
 	}
 
@@ -68,7 +70,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incrBy(key, integer);
 		} catch (JedisException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
 		}
 	}
 
@@ -82,7 +84,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.hincrBy(key, field, value);
 		} catch (JedisException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
 		}
 	}
 
@@ -96,7 +98,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 		} catch (JedisException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
 		}
 	}
 
@@ -106,7 +108,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.disconnect();
 		} catch (JedisException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
 		}
 	}
 }

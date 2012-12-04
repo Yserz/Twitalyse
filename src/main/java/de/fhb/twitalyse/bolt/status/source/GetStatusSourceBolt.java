@@ -12,6 +12,8 @@ import de.fhb.twitalyse.bolt.Status;
 import de.fhb.twitalyse.utils.TwitterUtils;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This Bolt gets the Twitter Status Source out of the whole Status.
@@ -19,6 +21,7 @@ import java.util.Map;
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class GetStatusSourceBolt extends BaseRichBolt {
+	private final static Logger LOGGER = Logger.getLogger(GetStatusSourceBolt.class.getName());
 
 	private OutputCollector collector;
 
@@ -44,18 +47,11 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 			collector.emit(input, new Values(id, source));
 			collector.ack(input);
 		} catch (RuntimeException re) {
-			System.out.println("########################################################");
-			System.out.println(re+"\n"+re.getMessage());
-			System.out.println("JSON: "+json);
-			System.out.println("########################################################");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", new Object[]{re, re.getMessage(), re.getCause(), json});
 		}
 
 	}
 
-//	@Override
-//	public void cleanup() {
-//		
-//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("id", "text"));

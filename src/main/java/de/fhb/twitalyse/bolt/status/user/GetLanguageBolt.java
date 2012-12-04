@@ -26,6 +26,8 @@ import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 import de.fhb.twitalyse.bolt.Status;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This Bolt gets the Twitter Language Text out of the whole Status.
@@ -33,7 +35,8 @@ import java.util.Map;
  * @author Andy Klay <klay@fh-brandenburg.de>
  */
 public class GetLanguageBolt extends BaseRichBolt {
-
+	private final static Logger LOGGER = Logger.getLogger(GetLanguageBolt.class.getName());
+	
 	private OutputCollector collector;
 
 	@Override
@@ -56,10 +59,7 @@ public class GetLanguageBolt extends BaseRichBolt {
 			collector.emit(input, new Values(id, ts.user.lang));
 			collector.ack(input);
 		} catch (RuntimeException re) {
-			System.out.println("########################################################");
-			System.out.println(re+"\n"+re.getMessage());
-			System.out.println("JSON: " + json);
-			System.out.println("########################################################");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", new Object[]{re, re.getMessage(), re.getCause(), json});
 		}
 
 	}
