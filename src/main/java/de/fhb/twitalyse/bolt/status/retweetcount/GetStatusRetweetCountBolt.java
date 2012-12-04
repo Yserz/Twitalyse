@@ -34,44 +34,43 @@ import java.util.Map;
  */
 public class GetStatusRetweetCountBolt extends BaseRichBolt {
 
-    private OutputCollector collector;
+	private OutputCollector collector;
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("id", "retweets"));
-    }
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("id", "retweets"));
+	}
 
-    @Override
-    public void prepare(Map stormConf, TopologyContext context,
-            OutputCollector collector) {
-        this.collector = collector;
-    }
+	@Override
+	public void prepare(Map stormConf, TopologyContext context,
+			OutputCollector collector) {
+		this.collector = collector;
+	}
 
-    @Override
-    public void execute(Tuple input) {
-        long id = input.getLong(0);
-        System.out.println("SplitRetweetCountBolt Status ID: " + id);
-        String json = input.getString(1);
+	@Override
+	public void execute(Tuple input) {
+		long id = input.getLong(0);
+		System.out.println("SplitRetweetCountBolt Status ID: " + id);
+		String json = input.getString(1);
 
-        try {
-            Gson gson = new Gson();
-            Status ts = gson.fromJson(json, Status.class);
-            Long retweetCount=ts.retweet_count;
+		try {
+			Gson gson = new Gson();
+			Status ts = gson.fromJson(json, Status.class);
+			Long retweetCount = ts.retweet_count;
 
-            System.out.println("SplitRetweetCountBolt Retweet Status : "
-                    + retweetCount);
+			System.out.println("SplitRetweetCountBolt Retweet Status : "
+					+ retweetCount);
 
-            if (ts.retweeted) {
-                collector.emit(input, new Values(id, retweetCount));
-                collector.ack(input);
-            }
+			if (ts.retweeted) {
+				collector.emit(input, new Values(id, retweetCount));
+				collector.ack(input);
+			}
 
-        } catch (RuntimeException re) {
-            System.out.println("########################################################");
-            re.printStackTrace();
-            System.out.println("Exception: " + re);
-            System.out.println("JSON: " + json);
-            System.out.println("########################################################");
-        }
-    }
+		} catch (RuntimeException re) {
+			System.out.println("########################################################");
+			System.out.println(re+"\n"+re.getMessage());
+			System.out.println("JSON: " + json);
+			System.out.println("########################################################");
+		}
+	}
 }

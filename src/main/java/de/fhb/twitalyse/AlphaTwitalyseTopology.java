@@ -28,12 +28,10 @@ import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
-import de.fhb.twitalyse.bolt.redis.CountPlaceBolt;
 import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
-import de.fhb.twitalyse.bolt.status.place.GetPlaceBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
@@ -68,20 +66,9 @@ public class AlphaTwitalyseTopology {
 		builder = new TopologyBuilder();
 		initTwitterSpout();
 		initWordCount();
-//		initSourceCount();
-//		initRetweetCount();
-//		initLanguageCount();
-//		initPlaceCount();
-	}
-
-	private void initPlaceCount() {
-		GetPlaceBolt getPlaceBolt = new GetPlaceBolt();
-		CountPlaceBolt countPlaceBolt = new CountPlaceBolt(redisHost, redisPort);
-
-		builder.setBolt("getPlaceBolt", getPlaceBolt).shuffleGrouping(
-				TWITTERSPOUT);
-		builder.setBolt("countPlaceBolt", countPlaceBolt).shuffleGrouping(
-				"getPlaceBolt");
+		initSourceCount();
+		initRetweetCount();
+		initLanguageCount();
 	}
 
 	private void initLanguageCount() {
@@ -199,11 +186,11 @@ public class AlphaTwitalyseTopology {
 		try {
 			a.startTopology(args);
 		} catch (AlreadyAliveException e) {
-			e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		} catch (InvalidTopologyException e) {
-			e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		}
 	}
 }

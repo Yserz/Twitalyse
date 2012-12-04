@@ -45,7 +45,7 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 			collector.ack(input);
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");
-			System.out.println("Exception: "+re);
+			System.out.println(re+"\n"+re.getMessage());
 			System.out.println("JSON: "+json);
 			System.out.println("########################################################");
 		}

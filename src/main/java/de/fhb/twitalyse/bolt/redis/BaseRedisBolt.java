@@ -41,8 +41,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.zincrby(key, score, member);
 		} catch (JedisException e) {
-			System.out.println("Exception: " + e);
-                        e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		}
 	}
 
@@ -55,8 +54,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incr(key);
 		} catch (JedisException e) {
-			System.out.println("Exception: " + e);
-                        e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		}
 	}
 
@@ -70,8 +68,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incrBy(key, integer);
 		} catch (JedisException e) {
-			System.out.println("Exception: " + e);
-                        e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		}
 	}
 
@@ -85,8 +82,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.hincrBy(key, field, value);
 		} catch (JedisException e) {
-			System.out.println("Exception: " + e);
-                        e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		}
 	}
 
@@ -100,8 +96,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 		} catch (JedisException e) {
-			System.out.println("Exception: " + e);
-                        e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		}
 	}
 
@@ -111,8 +106,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.disconnect();
 		} catch (JedisException e) {
-			System.out.println("Exception: " + e);
-                        e.printStackTrace();
+			System.out.println(e+"\n"+e.getMessage());
 		}
 	}
 }

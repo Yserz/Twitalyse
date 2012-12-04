@@ -57,9 +57,8 @@ public class GetLanguageBolt extends BaseRichBolt {
 			collector.ack(input);
 		} catch (RuntimeException re) {
 			System.out.println("########################################################");
-                        re.printStackTrace();
-			System.out.println("Exception: "+re);
-			System.out.println("JSON: "+json);
+			System.out.println(re+"\n"+re.getMessage());
+			System.out.println("JSON: " + json);
 			System.out.println("########################################################");
 		}
 

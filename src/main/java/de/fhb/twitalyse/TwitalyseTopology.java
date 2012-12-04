@@ -29,10 +29,6 @@ import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
 import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
-import de.fhb.twitalyse.bolt.status.user.GetFavouritesBolt;
-import de.fhb.twitalyse.bolt.status.user.GetFollowerBolt;
-import de.fhb.twitalyse.bolt.status.user.GetFriendsBolt;
-import de.fhb.twitalyse.bolt.status.user.GetHashtagBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import java.util.Arrays;
 import java.util.Properties;
@@ -109,21 +105,6 @@ public class TwitalyseTopology {
         GetStatusRetweetCountBolt splitRetweetCounterBolt = new GetStatusRetweetCountBolt();
         CountRetweetBolt countRetweetBolt = new CountRetweetBolt(host, port);
 
-        // Hashtag Counter
-        GetHashtagBolt getHashtagBolt = new GetHashtagBolt();
-        CountHashtagBolt countHashtagBolt = new CountHashtagBolt(host, port);
-
-        // Follower Counter
-        GetFollowerBolt getFollowerBolt = new GetFollowerBolt();
-        CountFollowerBolt countFollowerBolt = new CountFollowerBolt(host, port);
-
-        // Friends Counter
-        GetFriendsBolt getFriendsBolt = new GetFriendsBolt();
-        CountFriendsBolt countFriendsBolt = new CountFriendsBolt(host, port);
-
-        // Favorites Counter
-        GetFavouritesBolt getFavouritesBolt = new GetFavouritesBolt();
-        CountFavouritesBolt countFavouritesBolt = new CountFavouritesBolt(host, port);
 
 
         // WordCount
@@ -140,23 +121,7 @@ public class TwitalyseTopology {
         builder.setBolt("getLanguageBolt", getLanguageBolt).shuffleGrouping("twitterStreamSpout");
         builder.setBolt("countLanguageBolt", countLanguageBolt).shuffleGrouping("getLanguageBolt");
 
-        // Hashtag Bolt
-        builder.setBolt("getHashtagBolt", getHashtagBolt).shuffleGrouping("twitterStreamSpout");
-        builder.setBolt("countHashtagBolt", countHashtagBolt).shuffleGrouping("getHashtagBolt");
-
-        // Follower Bolt
-        builder.setBolt("getFollowerBolt", getFollowerBolt).shuffleGrouping("twitterStreamSpout");
-        builder.setBolt("countFollowerBolt", countFollowerBolt).shuffleGrouping("getFollowerBolt");
-
-        // Friends Bolt
-        builder.setBolt("getFriendsBolt", getFriendsBolt).shuffleGrouping("twitterStreamSpout");
-        builder.setBolt("countFriendsBolt", countFriendsBolt).shuffleGrouping("getFriendsBolt");
-
-        // Favorites Bolt
-        builder.setBolt("getFavouritesBolt", getFavouritesBolt).shuffleGrouping("twitterStreamSpout");
-        builder.setBolt("countFavouritesBolt", countFavouritesBolt).shuffleGrouping("getFavouritesBolt");
-
-
+        
 
 
         // Retweet Counter
