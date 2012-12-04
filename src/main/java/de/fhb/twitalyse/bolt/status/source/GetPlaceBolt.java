@@ -14,49 +14,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.redis;
+package de.fhb.twitalyse.bolt.status.source;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import com.google.gson.Gson;
+import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.utils.TwitterUtils;
+
 import java.util.Map;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
+ * This Bolt gets the Twitter Status Source out of the whole Status.
  *
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
-public class CountSourceBolt extends BaseRedisBolt {
+public class GetPlaceBolt extends BaseRichBolt {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8367958498374053860L;
+	private OutputCollector collector;
 
-	public CountSourceBolt(String host, int port) {
-		super(host, port);
+	@Override
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		this.collector = collector;
 	}
 
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		String source = input.getString(1);
-		System.out.println("CountSourceBolt Word: " + source);
+		String json = input.getString(1);
 
-		this.zincrBy("sources", 1, source);
+		try {
+			Gson gson = new Gson();
+			Status ts = gson.fromJson(json, Status.class);
+			
+			String placeName = ts.place.bounding_box.name;
+
+			collector.emit(input, new Values(id, placeName));
+			collector.ack(input);
+		} catch (RuntimeException re) {
+			System.out.println("########################################################");
+			System.out.println("Exception: "+re);
+			System.out.println("JSON: "+json);
+			System.out.println("########################################################");
+		}
+
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		
+		declarer.declare(new Fields("id", "text"));
 	}
-
-	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		
-	}
-
 }

@@ -17,7 +17,9 @@
 package de.fhb.twitalyse;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -26,22 +28,22 @@ import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
+import de.fhb.twitalyse.bolt.redis.CountPlaceBolt;
 import de.fhb.twitalyse.bolt.redis.CountRetweetBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
-import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
-import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.retweetcount.GetStatusRetweetCountBolt;
+import de.fhb.twitalyse.bolt.status.source.GetPlaceBolt;
+import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.text.GetLanguageBolt;
+import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
-import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
  * 
- * @author ott
+ * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class AlphaTwitalyseTopology {
 
@@ -69,6 +71,17 @@ public class AlphaTwitalyseTopology {
 		initSourcCount();
 		initRetweetCount();
 		initLanguageCount();
+		initPlaceCount();
+	}
+
+	private void initPlaceCount() {
+		GetPlaceBolt getPlaceBolt = new GetPlaceBolt();
+		CountPlaceBolt countPlaceBolt = new CountPlaceBolt(redisHost, redisPort);
+
+		builder.setBolt("getPlaceBolt", getPlaceBolt).shuffleGrouping(
+				TWITTERSPOUT);
+		builder.setBolt("countPlaceBolt", countPlaceBolt).shuffleGrouping(
+				"getPlaceBolt");
 	}
 
 	private void initLanguageCount() {
@@ -180,8 +193,8 @@ public class AlphaTwitalyseTopology {
 			cluster.shutdown();
 		}
 	}
-	
-	public static void main(String[] args) throws IOException{
+
+	public static void main(String[] args) throws IOException {
 		AlphaTwitalyseTopology a = new AlphaTwitalyseTopology();
 		try {
 			a.startTopology(args);

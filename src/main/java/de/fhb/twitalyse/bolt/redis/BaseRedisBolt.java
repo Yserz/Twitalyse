@@ -34,7 +34,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 	 * @param score
 	 * @param member
 	 */
-	protected void zIncrBy(String key, double score, String member) {
+	protected void zincrBy(String key, double score, String member) {
 		try {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
