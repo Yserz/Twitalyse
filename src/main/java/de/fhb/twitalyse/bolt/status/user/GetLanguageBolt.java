@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt.status.text;
+package de.fhb.twitalyse.bolt.status.user;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -43,7 +43,7 @@ public class GetLanguageBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
+		Long id = input.getLong(0);
 		System.out.println("GetLanguageBolt Status ID: " + id);
 		String json = input.getString(1);
 

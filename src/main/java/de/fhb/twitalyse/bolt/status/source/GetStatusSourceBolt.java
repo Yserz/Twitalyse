@@ -29,7 +29,7 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
+		Long id = input.getLong(0);
 		System.out.println("GetStatusSourceBolt Status ID: " + id);
 		String json = input.getString(1);
 

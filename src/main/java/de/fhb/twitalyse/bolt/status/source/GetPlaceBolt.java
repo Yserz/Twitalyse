@@ -45,7 +45,7 @@ public class GetPlaceBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
+		Long id = input.getLong(0);
 		String json = input.getString(1);
 
 		try {
