@@ -21,6 +21,8 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -50,12 +52,19 @@ public class CountWordsBolt extends BaseRichBolt {
 		try {
 			Jedis jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
-			
+
+			Date today = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+
+			// Saves all words of today
+			jedis.zincrby("words_"+sdf.format(today), 1, word);
+			// Saves all words
 			jedis.zincrby("words", 1, word);
-			
-//			jedis.hincrBy("words", word, 1L);
+			// Saves # of filtered words
 			jedis.incr("#words_filtered");
-			
+			// Saves # of filtered words of today
+			jedis.incr("#words_filtered_"+sdf.format(today));
+
 			jedis.disconnect();
 		} catch (JedisConnectionException e) {
 			System.out.println("################################################");
@@ -67,12 +76,9 @@ public class CountWordsBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		
 	}
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		
 	}
-
 }
