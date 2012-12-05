@@ -41,8 +41,9 @@ public class GetCoordsForLangBolt extends BaseRichBolt {
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
-
+			System.out.println("COORDS: " +ts.coordinates);
 			if(ts.user.lang == lang && ts.coordinates != null){
+				System.out.println("OK");
 				collector.emit(input, new Values(id, ts.coordinates.coordinates.get(0), ts.coordinates.coordinates.get(1), ts.text));
 				collector.ack(input);
 			}else{

@@ -37,7 +37,9 @@ public class FilterCoordsBolt extends BaseRichBolt{
 	@Override
 	public void execute(Tuple input) {
 		Point p = new Point(input.getDouble(1), input.getDouble(2));
+		System.out.println("FilterCoords");
 		if (CalcCoordinates.isPointInCircle(centerPoint, p, radius)) {
+			System.out.println("is in circle");
 			this.collector.emit(input, new Values(input.getLong(0), input.getString(3)));
 			this.collector.ack(input);
 		} else {
