@@ -43,7 +43,8 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.zincrby(key, score, member);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
 
@@ -56,7 +57,8 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incr(key);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
 
@@ -70,7 +72,8 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incrBy(key, integer);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
 
@@ -84,7 +87,8 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.hincrBy(key, field, value);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
 
@@ -98,7 +102,8 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
 
@@ -108,7 +113,8 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.disconnect();
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
 }
