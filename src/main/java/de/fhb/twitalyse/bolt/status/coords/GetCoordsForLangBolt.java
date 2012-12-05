@@ -12,16 +12,19 @@ import backtype.storm.tuple.Values;
 
 import com.google.gson.Gson;
 
-import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.bolt.data.Status;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Christoph Ott <ott@fh-brandenburg.de>
- * 
+ *
  */
 public class GetCoordsForLangBolt extends BaseRichBolt {
+	private final static Logger LOGGER = Logger.getLogger(GetCoordsForLangBolt.class.getName());
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 2075295658799531985L;
 	private OutputCollector collector;
@@ -49,18 +52,14 @@ public class GetCoordsForLangBolt extends BaseRichBolt {
 			if (ts.user.lang.equals(lang) && ts.coordinates != null) {
 				collector.emit(input,
 						new Values(id, ts.coordinates.coordinates.get(1),
-								ts.coordinates.coordinates.get(0), ts.text));
+						ts.coordinates.coordinates.get(0), ts.text));
 				collector.ack(input);
 			} else {
 				collector.ack(input);
 			}
 		} catch (RuntimeException re) {
-			System.out
-					.println("########################################################");
-			System.out.println(re + "\n" + re.getMessage());
-			System.out.println("JSON: " + json);
-			System.out
-					.println("########################################################");
+			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
+					new Object[]{re, re.getMessage(), re.getCause(), json});
 		}
 	}
 

@@ -24,7 +24,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
-import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.bolt.data.Status;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,14 +47,14 @@ public class GetLanguageBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("GetLanguageBolt Status ID: " + id);
+		LOGGER.log(Level.INFO, "GetLanguageBolt Status ID: {0}", id);
 		String json = input.getString(1);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			System.out.println("GetLanguageBolt Extracted Status Language: " + ts.user.lang);
+			LOGGER.log(Level.INFO, "GetLanguageBolt Extracted Status Language: {0}", ts.user.lang);
 
 			collector.emit(input, new Values(id, ts.user.lang));
 			collector.ack(input);

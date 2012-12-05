@@ -11,18 +11,21 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.topology.TopologyBuilder;
-import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
-import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
-import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsInLangCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.FilterCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.GetCoordsForLangBolt;
-import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
-import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
-import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import de.fhb.twitalyse.utils.Point;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
@@ -30,6 +33,7 @@ import de.fhb.twitalyse.utils.Point;
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class LangCoordsInCircleTopology {
+	private final static Logger LOGGER = Logger.getLogger(LangCoordsInCircleTopology.class.getName());
 
 	private static final String TWITTERSPOUT = "twitterSpout";
 	private TopologyBuilder builder;
@@ -51,11 +55,66 @@ public class LangCoordsInCircleTopology {
 	}
 
 	private void initBuilder() {
+		initLogger();
 		builder = new TopologyBuilder();
 		initTwitterSpout();
 		initGetCoordsForLang();
 	}
 
+	private void initLogger() {
+		Level consoleHandlerLevel = Level.SEVERE;
+		Level fileHandlerLevel = Level.INFO;
+		Date today = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+
+		//setting up ConsoleHandler
+		Logger rootLogger = Logger.getLogger("");
+
+		Handler[] handlers = rootLogger.getHandlers();
+
+		ConsoleHandler chandler = null;
+
+		for (int i = 0; i < handlers.length; i++) {
+			if (handlers[i] instanceof ConsoleHandler) {
+				chandler = (ConsoleHandler) handlers[i];
+			}
+		}
+
+		if (chandler != null) {
+			chandler.setLevel(consoleHandlerLevel);
+		} else {
+			LOGGER.log(Level.SEVERE, "No ConsoleHandler there.");
+		}
+
+		//setting up FileHandler
+		FileHandler fh = null;
+		try {
+			fh = new FileHandler("log/log_" + sdf.format(today) + ".log");
+			fh.setFormatter(new SimpleFormatter());
+			fh.setLevel(fileHandlerLevel);
+		} catch (IOException ex) {
+			new File("log").mkdir();
+			try {
+				fh = new FileHandler("log/log_" + sdf.format(today) + ".log");
+				fh.setFormatter(new SimpleFormatter());
+				fh.setLevel(fileHandlerLevel);
+			} catch (IOException ex1) {
+				System.err.println("Input-output-error while creating the initial log.");
+				LOGGER.log(Level.SEVERE, null, ex1);
+			} catch (SecurityException ex1) {
+				LOGGER.log(Level.SEVERE, null, ex1);
+			}
+			LOGGER.log(Level.SEVERE, null, ex);
+
+		} catch (SecurityException ex) {
+			System.err.println("Cannot open/access Log-Folder so I will not log anything.");
+			LOGGER.log(Level.SEVERE, null, ex);
+		}
+
+		if (fh != null) {
+			rootLogger.addHandler(fh);
+		}
+	}
 	private void initProperties() throws IOException {
 		PropertyLoader propLoader = new PropertyLoader();
 
@@ -145,9 +204,9 @@ public class LangCoordsInCircleTopology {
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		}else{
-			System.out.println("Wrong Number of args");
-			System.out.println("<UI_NAME> <language> <latitude> <longitude> <radius>");
-			System.out.println("Topology not startet");
+			LOGGER.log(Level.SEVERE, "Wrong Number of args\n"
+					+ "<UI_NAME> <language> <latitude> <longitude> <radius>\n"
+					+ "Topology not startet");
 		}
 	}
 
@@ -156,11 +215,11 @@ public class LangCoordsInCircleTopology {
 		try {
 			a.startTopology(args);
 		} catch (AlreadyAliveException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, e+"\n"+e.getMessage());
 		} catch (InvalidTopologyException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, e+"\n"+e.getMessage());
 		} catch (InterruptedException e) {
-			System.out.println(e+"\n"+e.getMessage());
+			LOGGER.log(Level.SEVERE, e+"\n"+e.getMessage());
 		}
 	}
 }

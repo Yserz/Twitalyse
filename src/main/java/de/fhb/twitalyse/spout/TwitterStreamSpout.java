@@ -133,7 +133,7 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 				jedis.disconnect();
 			} catch (JedisException e) {
-				System.out.println("Exception: " + e);
+				LOGGER.log(Level.SEVERE, "Exception: {0}", e);
 			}
 
 		}

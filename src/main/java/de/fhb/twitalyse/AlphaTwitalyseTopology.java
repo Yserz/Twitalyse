@@ -80,7 +80,7 @@ public class AlphaTwitalyseTopology {
 	}
 	
 	private void initLogger() {
-		Level consoleHandlerLevel = Level.INFO;
+		Level consoleHandlerLevel = Level.SEVERE;
 		Level fileHandlerLevel = Level.INFO;
 		Date today = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
@@ -219,6 +219,7 @@ public class AlphaTwitalyseTopology {
 			} else {
 				conf.setNumWorkers(DEFAULT_NUMBEROFWORKERS);
 			}
+			LOGGER.log(Level.SEVERE,"Starting Cluster......");
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		} else {

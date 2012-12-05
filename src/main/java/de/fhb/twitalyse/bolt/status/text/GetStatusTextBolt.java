@@ -24,7 +24,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
-import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.bolt.data.Status;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,15 +46,14 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		Long id = input.getLong(0);
-		System.out.println("GetStatusTextBolt Status ID: " + id);
+		LOGGER.log(Level.INFO, "GetStatusTextBolt Status ID: {0}", id);
 		String json = input.getString(1);
-//		System.out.println("GetStatusTextBolt JSON: "+json);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			System.out.println("GetStatusTextBolt Extracted Status Text: " + ts.text);
+			LOGGER.log(Level.INFO, "GetStatusTextBolt Extracted Status Text: {0}", ts.text);
 
 			collector.emit(input, new Values(id, ts.text));
 			collector.ack(input);
@@ -65,10 +64,6 @@ public class GetStatusTextBolt extends BaseRichBolt {
 
 	}
 
-//	@Override
-//	public void cleanup() {
-//		
-//	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("id", "text"));

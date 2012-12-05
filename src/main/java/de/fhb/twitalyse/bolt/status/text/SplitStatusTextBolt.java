@@ -29,6 +29,8 @@ import backtype.storm.tuple.Values;
 import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This Bolt analyses the given Twitter Status Text.
@@ -36,6 +38,7 @@ import java.util.Date;
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class SplitStatusTextBolt extends BaseRedisBolt {
+	private final static Logger LOGGER = Logger.getLogger(SplitStatusTextBolt.class.getName());
 
 	private OutputCollector collector;
 	private List<String> ignoreWords;
@@ -54,16 +57,16 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		System.out.println("AnalyseStatusTextBolt Status ID: " + id);
+		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Status ID: {0}", id);
 		String text = input.getString(1);
-		System.out.println("AnalyseStatusTextBolt Text: " + text);
+		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Text: {0}", text);
 
 		text = text.toLowerCase();
 		//Clean up text
 		for (String wordToIgnore : ignoreWords) {
 			text = text.replaceAll(wordToIgnore, "");
 		}
-		System.out.println("AnalyseStatusTextBolt filtered Text: " + text);
+		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt filtered Text: {0}", text);
 
 		//Split text
 		text = text.trim();
