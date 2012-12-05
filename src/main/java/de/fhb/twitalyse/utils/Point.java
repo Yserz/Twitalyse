@@ -22,6 +22,11 @@ package de.fhb.twitalyse.utils;
  */
 public class Point {
 
+	@Override
+	public String toString() {
+		return "Point [lat=" + lat + ", lng=" + lng + "]";
+	}
+
 	double lat;
 	double lng;
 

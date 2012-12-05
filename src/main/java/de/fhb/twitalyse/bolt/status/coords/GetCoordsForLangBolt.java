@@ -5,6 +5,8 @@ import java.util.Map;
 import com.google.gson.Gson;
 
 import de.fhb.twitalyse.bolt.Status;
+import de.fhb.twitalyse.utils.CalcCoordinates;
+import de.fhb.twitalyse.utils.Point;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -41,10 +43,20 @@ public class GetCoordsForLangBolt extends BaseRichBolt {
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
-			System.out.println("COORDS: " +ts.coordinates);
+			if(ts.coordinates != null){
+			System.out.println("LAT:" +ts.coordinates.coordinates.get(1));
+			System.out.println("LNG:" +ts.coordinates.coordinates.get(0));
+			System.out.println(CalcCoordinates.distanceInKm(new Point(ts.coordinates.coordinates.get(1), ts.coordinates.coordinates.get(0)), new Point(40.044438, -98.187011)));
+			System.out.println("-----------------------------------------");
+			}
+			
 			if(ts.user.lang == lang && ts.coordinates != null){
 				System.out.println("OK");
-				collector.emit(input, new Values(id, ts.coordinates.coordinates.get(0), ts.coordinates.coordinates.get(1), ts.text));
+				collector.emit(input, new Values(id, ts.coordinates.coordinates.get(1), ts.coordinates.coordinates.get(0), ts.text));
+				collector.ack(input);
+			}else if(ts.coordinates != null){
+				System.out.println(ts.user.lang);
+				collector.emit(input, new Values(id, ts.coordinates.coordinates.get(1), ts.coordinates.coordinates.get(0), ts.text));
 				collector.ack(input);
 			}else{
 				collector.ack(input);

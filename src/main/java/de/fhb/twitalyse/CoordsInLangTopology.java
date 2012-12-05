@@ -116,14 +116,14 @@ public class CoordsInLangTopology {
 		
 		if (args == null || args.length == 0){
 			conf.setMaxTaskParallelism(3);
-			this.lang = "de";
-			this.centerPoint = new Point(52.520399, 13.416264);
-			this.radius = 400;
+			this.lang = "en";
+			this.centerPoint = new Point(0.527336, 110.715821);
+			this.radius = 8000;
 
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());
 
-			Thread.sleep(60000);
+			Thread.sleep(6200000);
 
 			cluster.shutdown();
 		}else if(args.length == 5){
