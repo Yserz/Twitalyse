@@ -14,17 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt;
+package de.fhb.twitalyse.bolt.data;
 
 import java.util.List;
 /**
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class Url{
-   	public String display_url;
-   	public String expanded_url;
+public class Hashtag{
 	public List<Integer> indices;
-   	public String url;
+   	public String text;
 
 }

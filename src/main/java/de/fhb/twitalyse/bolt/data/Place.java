@@ -14,16 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt;
-
-import java.util.List;
+package de.fhb.twitalyse.bolt.data;
 /**
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class Entity{
-   	public List<Hashtag> hashtags;
-   	public List<Url> urls;
-   	public List<User_mention> user_mentions;
+public class Place{
+   	public Bounding_box bounding_box;
+   	public String country_code;
 
 }

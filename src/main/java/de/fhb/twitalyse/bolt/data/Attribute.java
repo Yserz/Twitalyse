@@ -14,25 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fhb.twitalyse.bolt;
-
-import java.util.List;
-
+package de.fhb.twitalyse.bolt.data;
 /**
  *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
-public class Bounding_box{
-//   	public Attributes attributes;
-   	public String contry_code;
-//   	public List<Coordinates> coordinates;
-//	public List<Coordinate> coordinates;
-   	public String country;
-   	public String full_name;
-   	public String id;
-   	public String name;
-   	public String place_type;
-   	public String type;
-   	public String url;
+public class Attribute{
 
 }
