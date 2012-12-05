@@ -98,11 +98,13 @@ public class CoordsInLangTopology {
 		GetCoordsForLangBolt coordsLang = new GetCoordsForLangBolt(lang);
 		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius);
 		CountWordsInLangCoordsBolt count = new CountWordsInLangCoordsBolt(redisHost, redisPort);
+		SplitStatusTextBolt splitText = new SplitStatusTextBolt(ignoreList, redisHost, redisPort);
 
 		builder.setBolt("coordsLang", coordsLang)
 				.shuffleGrouping(TWITTERSPOUT);
 		builder.setBolt("filterCoords", filterCoords).shuffleGrouping("coordsLang");
-		builder.setBolt("countWordsInLangCoords", count).shuffleGrouping("filterCoords");
+		builder.setBolt("splitText", splitText).shuffleGrouping("filterCoords");
+		builder.setBolt("countWordsInLangCoords", count).shuffleGrouping("splitText");
 
 	}
 
