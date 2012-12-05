@@ -2,12 +2,6 @@ package de.fhb.twitalyse.bolt.status.coords;
 
 import java.util.Map;
 
-import com.google.gson.Gson;
-
-import de.fhb.twitalyse.bolt.Status;
-import de.fhb.twitalyse.utils.CalcCoordinates;
-import de.fhb.twitalyse.utils.Point;
-
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -16,16 +10,24 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
+import com.google.gson.Gson;
+
+import de.fhb.twitalyse.bolt.Status;
+
 /**
  * @author Christoph Ott <ott@fh-brandenburg.de>
- *
+ * 
  */
 public class GetCoordsForLangBolt extends BaseRichBolt {
-	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2075295658799531985L;
 	private OutputCollector collector;
 	private String lang;
-	
-	public GetCoordsForLangBolt(String lang){
+
+	public GetCoordsForLangBolt(String lang) {
 		this.lang = lang;
 	}
 
@@ -43,22 +45,13 @@ public class GetCoordsForLangBolt extends BaseRichBolt {
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
-			if(ts.coordinates != null){
-			System.out.println("LAT:" +ts.coordinates.coordinates.get(1));
-			System.out.println("LNG:" +ts.coordinates.coordinates.get(0));
-			System.out.println(CalcCoordinates.distanceInKm(new Point(ts.coordinates.coordinates.get(1), ts.coordinates.coordinates.get(0)), new Point(40.044438, -98.187011)));
-			System.out.println("-----------------------------------------");
-			}
-			
-			if(ts.user.lang == lang && ts.coordinates != null){
-				System.out.println("OK");
-				collector.emit(input, new Values(id, ts.coordinates.coordinates.get(1), ts.coordinates.coordinates.get(0), ts.text));
+
+			if (ts.user.lang.equals(lang) && ts.coordinates != null) {
+				collector.emit(input,
+						new Values(id, ts.coordinates.coordinates.get(1),
+								ts.coordinates.coordinates.get(0), ts.text));
 				collector.ack(input);
-			}else if(ts.coordinates != null){
-				System.out.println(ts.user.lang);
-				collector.emit(input, new Values(id, ts.coordinates.coordinates.get(1), ts.coordinates.coordinates.get(0), ts.text));
-				collector.ack(input);
-			}else{
+			} else {
 				collector.ack(input);
 			}
 		} catch (RuntimeException re) {

@@ -11,6 +11,11 @@ import backtype.storm.tuple.Tuple;
  */
 public class CountWordsInLangCoordsBolt extends BaseRedisBolt{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5197977666638999798L;
+
 	public CountWordsInLangCoordsBolt(String host, int port) {
 		super(host, port);
 	}

@@ -16,11 +16,18 @@
  */
 package de.fhb.twitalyse.utils;
 
+import java.io.Serializable;
+
 /**
  *
  * @author MacYser
  */
-public class Point {
+public class Point implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -89003963673310945L;
 
 	@Override
 	public String toString() {

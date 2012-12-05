@@ -29,7 +29,7 @@ import de.fhb.twitalyse.utils.Point;
  * 
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
-public class CoordsInLangTopology {
+public class LangCoordsInCircleTopology {
 
 	private static final String TWITTERSPOUT = "twitterSpout";
 	private TopologyBuilder builder;
@@ -46,9 +46,8 @@ public class CoordsInLangTopology {
 	private Point centerPoint;
 	private double radius;
 
-	public CoordsInLangTopology() throws IOException {
+	public LangCoordsInCircleTopology() throws IOException {
 		initProperties();
-		initBuilder();
 	}
 
 	private void initBuilder() {
@@ -80,11 +79,11 @@ public class CoordsInLangTopology {
 
 	private void initGetCoordsForLang() {
 		GetCoordsForLangBolt coordsLang = new GetCoordsForLangBolt(lang);
-		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius);
+		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius, redisHost, redisPort);
 		CountWordsInLangCoordsBolt count = new CountWordsInLangCoordsBolt(redisHost, redisPort);
 		SplitStatusTextBolt splitText = new SplitStatusTextBolt(ignoreList, redisHost, redisPort);
 
-		builder.setBolt("coordsLang", coordsLang)
+		builder.setBolt("coordsLang", coordsLang, 4)
 				.shuffleGrouping(TWITTERSPOUT);
 		builder.setBolt("filterCoords", filterCoords).shuffleGrouping("coordsLang");
 		builder.setBolt("splitText", splitText).shuffleGrouping("filterCoords");
@@ -117,13 +116,21 @@ public class CoordsInLangTopology {
 		if (args == null || args.length == 0){
 			conf.setMaxTaskParallelism(3);
 			this.lang = "en";
-			this.centerPoint = new Point(0.527336, 110.715821);
-			this.radius = 8000;
+			// New York
+			//this.centerPoint = new Point(40.712134, -74.004988);
+			
+			//Mitte EU
+			this.centerPoint = new Point(49.124219, 5.882080);
 
+
+			this.radius = 10000;
+			
+			initBuilder();
+			
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());
 
-			Thread.sleep(6200000);
+			Thread.sleep(60000);
 
 			cluster.shutdown();
 		}else if(args.length == 5){
@@ -131,7 +138,10 @@ public class CoordsInLangTopology {
 			this.centerPoint = new Point(Double.parseDouble(args[2]) , Double.parseDouble(args[3]));
 			this.radius = Double.parseDouble(args[4]);
 			
-			conf.setNumWorkers(4);
+			initBuilder();
+			
+			conf.setMaxTaskParallelism(8);
+			conf.setNumWorkers(8);
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		}else{
@@ -142,7 +152,7 @@ public class CoordsInLangTopology {
 	}
 
 	public static void main(String[] args) throws IOException {
-		CoordsInLangTopology a = new CoordsInLangTopology();
+		LangCoordsInCircleTopology a = new LangCoordsInCircleTopology();
 		try {
 			a.startTopology(args);
 		} catch (AlreadyAliveException e) {
