@@ -63,7 +63,6 @@ public class TwitalyseTopology {
 	private String consumerKey;
 	private String consumerKeySecure;
 	private final int DEFAULT_NUMBEROFWORKERS = 3;
-	private final int BOLT_PARALLELISM = 3;
 	private List<String> ignoreList;
 	private String redisHost;
 	private int redisPort;
@@ -79,10 +78,10 @@ public class TwitalyseTopology {
 	private void initBuilder() {
 		builder = new TopologyBuilder();
 		initTwitterSpout();
+//		initSourceCount();
 		initWordCount();
-		initSourceCount();
-		initLanguageCount();
-		initGetCoordsForLang();
+//		initLanguageCount();
+//		initGetCoordsForLang();
 	}
 	
 	private void initGetCoordsForLang() {
