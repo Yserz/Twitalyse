@@ -13,6 +13,7 @@ import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.CountWordsInLangCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.FilterCoordsBolt;
+import de.fhb.twitalyse.bolt.status.coords.GetCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.GetCoordsForLangBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
@@ -137,14 +138,14 @@ public class LangCoordsInCircleTopology {
 	}
 
 	private void initGetCoordsForLang() {
-		GetCoordsForLangBolt coordsLang = new GetCoordsForLangBolt(lang);
+		GetCoordsBolt coords = new GetCoordsBolt();
 		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius, redisHost, redisPort);
 		CountWordsInLangCoordsBolt count = new CountWordsInLangCoordsBolt(redisHost, redisPort);
 		SplitStatusTextBolt splitText = new SplitStatusTextBolt(ignoreList, redisHost, redisPort);
 
-		builder.setBolt("coordsLang", coordsLang, 4)
+		builder.setBolt("coords", coords, 4)
 				.shuffleGrouping(TWITTERSPOUT);
-		builder.setBolt("filterCoords", filterCoords).shuffleGrouping("coordsLang");
+		builder.setBolt("filterCoords", filterCoords).shuffleGrouping("coords");
 		builder.setBolt("splitText", splitText).shuffleGrouping("filterCoords");
 		builder.setBolt("countWordsInLangCoords", count).shuffleGrouping("splitText");
 
@@ -192,10 +193,9 @@ public class LangCoordsInCircleTopology {
 			Thread.sleep(60000);
 
 			cluster.shutdown();
-		}else if(args.length == 5){
-			this.lang = args[1];
-			this.centerPoint = new Point(Double.parseDouble(args[2]) , Double.parseDouble(args[3]));
-			this.radius = Double.parseDouble(args[4]);
+		}else if(args.length == 4){
+			this.centerPoint = new Point(Double.parseDouble(args[1]) , Double.parseDouble(args[2]));
+			this.radius = Double.parseDouble(args[3]);
 			
 			initBuilder();
 			
@@ -205,7 +205,7 @@ public class LangCoordsInCircleTopology {
 					builder.createTopology());
 		}else{
 			LOGGER.log(Level.SEVERE, "Wrong Number of args\n"
-					+ "<UI_NAME> <language> <latitude> <longitude> <radius>\n"
+					+ "<UI_NAME> <latitude> <longitude> <radius>\n"
 					+ "Topology not startet");
 		}
 	}
