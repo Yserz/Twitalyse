@@ -107,6 +107,7 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	@Override
 	public void onStatus(Status status) {
 		String json = DataObjectFactory.getRawJSON(status);
+		id = InprocMessaging.acquireNewPort();
 		InprocMessaging.sendMessage(id, new Values(status.getId(), json));
 	}
 
@@ -129,7 +130,7 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 				jedis.incr("#stati_" + sdf.format(today));
 
 				// Status ID + Status-JSON
-				collector.emit(new Values(value.get(0), value.get(1)));
+				collector.emit(new Values(value.get(0), value.get(1)), id);
 
 				jedis.disconnect();
 			} catch (JedisException e) {
@@ -142,7 +143,6 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	@Override
 	public void close() {
 		twitterStream.shutdown();
-
 	}
 
 	@Override
