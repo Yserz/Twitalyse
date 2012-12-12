@@ -16,21 +16,23 @@
  */
 package de.fhb.twitalyse;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import redis.clients.jedis.Jedis;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-import de.fhb.twitalyse.bolt.redis.*;
+import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
+import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
+import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
-import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
+import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
-import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.

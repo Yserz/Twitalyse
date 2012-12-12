@@ -16,9 +16,10 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.tuple.Tuple;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import backtype.storm.tuple.Tuple;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
@@ -26,6 +27,11 @@ import java.util.Date;
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class CountWordsBolt extends BaseRedisBolt {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3012129841702694630L;
 
 	public CountWordsBolt(String host, int port) {
 		super(host, port);

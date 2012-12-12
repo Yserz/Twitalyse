@@ -16,9 +16,13 @@
  */
 package de.fhb.twitalyse.bolt.status.text;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -27,10 +31,6 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This Bolt analyses the given Twitter Status Text.
@@ -38,6 +38,11 @@ import java.util.logging.Logger;
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class SplitStatusTextBolt extends BaseRedisBolt {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7734590864277387631L;
+
 	private final static Logger LOGGER = Logger.getLogger(SplitStatusTextBolt.class.getName());
 
 	private OutputCollector collector;
@@ -80,7 +85,6 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 
 			word = word.trim();
 			if (!word.equals("") && word.length() >= 3) {
-
 
 				// Saves # of all words
 				this.incr("#words_full");

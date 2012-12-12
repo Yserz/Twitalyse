@@ -16,6 +16,10 @@
  */
 package de.fhb.twitalyse.bolt.status.text;
 
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -23,11 +27,10 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+
 import com.google.gson.Gson;
+
 import de.fhb.twitalyse.bolt.data.Status;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
@@ -35,6 +38,10 @@ import java.util.logging.Logger;
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class GetStatusTextBolt extends BaseRichBolt {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6427253027765292007L;
 	private final static Logger LOGGER = Logger.getLogger(GetStatusTextBolt.class.getName());
 	private OutputCollector collector;
 

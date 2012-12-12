@@ -1,14 +1,15 @@
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import redis.clients.jedis.Jedis;
-import backtype.storm.topology.base.BaseRichBolt;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.base.BaseRichBolt;
 
 /**
  * Some Redis Operations
@@ -18,10 +19,7 @@ import redis.clients.jedis.exceptions.JedisException;
  */
 public abstract class BaseRedisBolt extends BaseRichBolt {
 	private final static Logger LOGGER = Logger.getLogger(BaseRedisBolt.class.getName());
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -3005326024690433763L;
+
 	protected OutputCollector collector;
 	private String host;
 	private int port;

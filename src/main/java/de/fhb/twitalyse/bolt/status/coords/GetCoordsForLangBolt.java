@@ -1,6 +1,8 @@
 package de.fhb.twitalyse.bolt.status.coords;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -13,8 +15,6 @@ import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 
 import de.fhb.twitalyse.bolt.data.Status;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Christoph Ott <ott@fh-brandenburg.de>

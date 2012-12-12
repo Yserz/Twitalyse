@@ -16,15 +16,6 @@
  */
 package de.fhb.twitalyse.spout;
 
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.testing.AckFailDelegate;
-import backtype.storm.topology.IRichSpout;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
-import backtype.storm.utils.InprocMessaging;
-import backtype.storm.utils.Utils;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
 import twitter4j.Status;
@@ -43,6 +35,15 @@ import twitter4j.TwitterStreamFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
+import backtype.storm.spout.SpoutOutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.testing.AckFailDelegate;
+import backtype.storm.topology.IRichSpout;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Values;
+import backtype.storm.utils.InprocMessaging;
+import backtype.storm.utils.Utils;
 
 /**
  * This Spout connects to the Twitter API and opens up a Stream. The Spout

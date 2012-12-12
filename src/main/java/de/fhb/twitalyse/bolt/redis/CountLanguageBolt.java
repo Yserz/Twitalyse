@@ -20,6 +20,11 @@ import backtype.storm.tuple.Tuple;
 
 public class CountLanguageBolt extends BaseRedisBolt {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8511876250962000527L;
+
 	public CountLanguageBolt(String host, int port) {
 		super(host, port);
 	}

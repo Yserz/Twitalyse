@@ -1,5 +1,9 @@
 package de.fhb.twitalyse.bolt.status.source;
 
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -7,13 +11,11 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+
 import com.google.gson.Gson;
+
 import de.fhb.twitalyse.bolt.data.Status;
 import de.fhb.twitalyse.utils.TwitterUtils;
-
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This Bolt gets the Twitter Status Source out of the whole Status.

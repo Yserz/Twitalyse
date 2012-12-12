@@ -1,6 +1,8 @@
 package de.fhb.twitalyse.bolt.status.coords;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -11,8 +13,6 @@ import backtype.storm.tuple.Values;
 import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
 import de.fhb.twitalyse.utils.CalcCoordinates;
 import de.fhb.twitalyse.utils.Point;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Christoph Ott <ott@fh-brandenburg.de>

@@ -1,9 +1,18 @@
 package de.fhb.twitalyse;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -14,19 +23,9 @@ import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.CountWordsInCircleBolt;
 import de.fhb.twitalyse.bolt.status.coords.FilterCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.GetCoordsBolt;
-import de.fhb.twitalyse.bolt.status.coords.GetCoordsForLangBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import de.fhb.twitalyse.utils.Point;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.

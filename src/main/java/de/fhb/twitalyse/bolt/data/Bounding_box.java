@@ -16,7 +16,6 @@
  */
 package de.fhb.twitalyse.bolt.data;
 
-import java.util.List;
 
 /**
  *
