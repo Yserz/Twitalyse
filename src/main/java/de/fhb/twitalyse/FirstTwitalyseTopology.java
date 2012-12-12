@@ -39,6 +39,7 @@ import java.util.Properties;
  * @author Andy Klay <klay@fh-brandenburg.de>
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
+@Deprecated
 public class FirstTwitalyseTopology {
 
     public static void main(String[] args) throws Exception {

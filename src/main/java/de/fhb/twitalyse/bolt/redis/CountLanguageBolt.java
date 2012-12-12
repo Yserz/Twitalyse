@@ -31,7 +31,7 @@ public class CountLanguageBolt extends BaseRedisBolt {
 		System.out.println("CountLanguageBolt Language: " + language);
 
 		this.zincrby("languages", 1d, language);
-
+		this.collector.ack(input);
 
 	}
 }

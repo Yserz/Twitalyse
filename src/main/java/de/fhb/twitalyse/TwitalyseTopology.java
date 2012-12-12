@@ -16,10 +16,19 @@
  */
 package de.fhb.twitalyse;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -30,25 +39,15 @@ import backtype.storm.topology.TopologyBuilder;
 import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
-import de.fhb.twitalyse.bolt.redis.CountWordsInLangCoordsBolt;
+import de.fhb.twitalyse.bolt.redis.CountWordsInCircleBolt;
 import de.fhb.twitalyse.bolt.status.coords.FilterCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.GetCoordsBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
-import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
+import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import de.fhb.twitalyse.utils.Point;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
@@ -62,7 +61,7 @@ public class TwitalyseTopology {
 	private TopologyBuilder builder;
 	private String consumerKey;
 	private String consumerKeySecure;
-	private final int DEFAULT_NUMBEROFWORKERS = 3;
+	private final int DEFAULT_NUMBEROFWORKERS = 4;
 	private List<String> ignoreList;
 	private String redisHost;
 	private int redisPort;
@@ -78,26 +77,30 @@ public class TwitalyseTopology {
 	private void initBuilder() {
 		builder = new TopologyBuilder();
 		initTwitterSpout();
-//		initSourceCount();
+		initSourceCount();
 		initWordCount();
-//		initLanguageCount();
-//		initGetCoordsForLang();
+		initLanguageCount();
+		initGetCoordsInCircle();
 	}
 	
-	private void initGetCoordsForLang() {
-		GetCoordsBolt coords = new GetCoordsBolt();
-		//Mitte EU
+	private void initGetCoordsInCircle() {
+		
+		
+		// New York
+//		Point centerPoint =  new Point(40.712134, -74.004988);
+		// Mitte EU
 		Point centerPoint = new Point(49.124219, 5.882080);
-		double radius = 500;
+		double radius = 1000;
+		GetCoordsBolt coords = new GetCoordsBolt();
 		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius, redisHost, redisPort);
-		CountWordsInLangCoordsBolt count = new CountWordsInLangCoordsBolt(redisHost, redisPort);
 		SplitStatusTextBolt splitText = new SplitStatusTextBolt(ignoreList, redisHost, redisPort);
+		CountWordsInCircleBolt count = new CountWordsInCircleBolt(redisHost, redisPort);
+		
 
-		builder.setBolt("coords", coords, 4)
-				.shuffleGrouping(TWITTERSPOUT);
-		builder.setBolt("filterCoords", filterCoords).shuffleGrouping("coords");
-		builder.setBolt("splitText", splitText).shuffleGrouping("filterCoords");
-		builder.setBolt("countWordsInLangCoords", count).shuffleGrouping("splitText");
+		builder.setBolt("1_1 getCoords", coords).allGrouping(TWITTERSPOUT);
+		builder.setBolt("1_2 filterCoords", filterCoords).shuffleGrouping("1_1 getCoords");
+		builder.setBolt("1_3 splitText", splitText).shuffleGrouping("1_2 filterCoords");
+		builder.setBolt("1_4 countWordsInCircle", count).shuffleGrouping("1_3 splitText");
 
 	}
 	
@@ -161,10 +164,10 @@ public class TwitalyseTopology {
 		CountLanguageBolt countLanguageBolt = new CountLanguageBolt(redisHost,
 				redisPort);
 
-		builder.setBolt("getLanguageBolt", getLanguageBolt).shuffleGrouping(
+		builder.setBolt("2_1 getLanguageBolt", getLanguageBolt).allGrouping(
 				TWITTERSPOUT);
-		builder.setBolt("countLanguageBolt", countLanguageBolt)
-				.shuffleGrouping("getLanguageBolt");
+		builder.setBolt("2_2 countLanguageBolt", countLanguageBolt)
+				.shuffleGrouping("2_1 getLanguageBolt");
 	}
 
 	private void initProperties() throws IOException {
@@ -193,10 +196,10 @@ public class TwitalyseTopology {
 		CountSourceBolt countSourceBolt = new CountSourceBolt(redisHost,
 				redisPort);
 
-		builder.setBolt("getStatusSourceBolt", getStatusSourceBolt)
-				.shuffleGrouping(TWITTERSPOUT);
-		builder.setBolt("countSourceBolt", countSourceBolt).shuffleGrouping(
-				"getStatusSourceBolt");
+		builder.setBolt("3_1 getStatusSourceBolt", getStatusSourceBolt)
+				.allGrouping(TWITTERSPOUT);
+		builder.setBolt("3_2 countSourceBolt", countSourceBolt).shuffleGrouping(
+				"3_1 getStatusSourceBolt");
 	}
 
 	private void initTwitterSpout() {
@@ -212,12 +215,12 @@ public class TwitalyseTopology {
 				ignoreList, redisHost, redisPort);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(redisHost, redisPort);
 
-		builder.setBolt("getTextBolt", getTextBolt).shuffleGrouping(
+		builder.setBolt("4_1 getTextBolt", getTextBolt).allGrouping(
 				TWITTERSPOUT);
-		builder.setBolt("splitStatusTextBolt", splitStatusTextBolt)
-				.shuffleGrouping("getTextBolt");
-		builder.setBolt("countWordsBolt", countWordsBolt, 8).shuffleGrouping(
-				"splitStatusTextBolt");
+		builder.setBolt("4_2 splitStatusTextBolt", splitStatusTextBolt)
+				.shuffleGrouping("4_1 getTextBolt");
+		builder.setBolt("4_3 countWordsBolt", countWordsBolt).shuffleGrouping(
+				"4_2 splitStatusTextBolt");
 	}
 
 	/**
@@ -258,9 +261,9 @@ public class TwitalyseTopology {
 	}
 
 	public static void main(String[] args) throws IOException {
-		TwitalyseTopology a = new TwitalyseTopology();
+		TwitalyseTopology topology = new TwitalyseTopology();
 		try {
-			a.startTopology(args);
+			topology.startTopology(args);
 		} catch (AlreadyAliveException e) {
 			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
 		} catch (InvalidTopologyException e) {

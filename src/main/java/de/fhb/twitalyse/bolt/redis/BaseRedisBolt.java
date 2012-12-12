@@ -22,6 +22,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 	 *
 	 */
 	private static final long serialVersionUID = -3005326024690433763L;
+	protected OutputCollector collector;
 	private String host;
 	private int port;
 	private transient Jedis jedis;
@@ -98,6 +99,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		this.collector = collector;
 		try {
 			jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);

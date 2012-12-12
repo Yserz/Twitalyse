@@ -9,14 +9,14 @@ import backtype.storm.tuple.Tuple;
  * @author Christoph Ott <ott@fh-brandenburg.de>
  *
  */
-public class CountWordsInLangCoordsBolt extends BaseRedisBolt{
+public class CountWordsInCircleBolt extends BaseRedisBolt{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -5197977666638999798L;
 
-	public CountWordsInLangCoordsBolt(String host, int port) {
+	public CountWordsInCircleBolt(String host, int port) {
 		super(host, port);
 	}
 
@@ -35,6 +35,8 @@ public class CountWordsInLangCoordsBolt extends BaseRedisBolt{
 		this.incr("#coordswords_filtered");
 		// Saves # of filtered words of today
 		this.incr("#coordswords_filtered_" + sdf.format(today));
+		
+		this.collector.ack(input);
 	}
 
 }

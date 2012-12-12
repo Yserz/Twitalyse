@@ -11,7 +11,7 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.topology.TopologyBuilder;
-import de.fhb.twitalyse.bolt.redis.CountWordsInLangCoordsBolt;
+import de.fhb.twitalyse.bolt.redis.CountWordsInCircleBolt;
 import de.fhb.twitalyse.bolt.status.coords.FilterCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.GetCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.GetCoordsForLangBolt;
@@ -33,6 +33,7 @@ import java.util.logging.SimpleFormatter;
  * 
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
+@Deprecated
 public class LangCoordsInCircleTopology {
 	private final static Logger LOGGER = Logger.getLogger(LangCoordsInCircleTopology.class.getName());
 
@@ -140,7 +141,7 @@ public class LangCoordsInCircleTopology {
 	private void initGetCoordsForLang() {
 		GetCoordsBolt coords = new GetCoordsBolt();
 		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius, redisHost, redisPort);
-		CountWordsInLangCoordsBolt count = new CountWordsInLangCoordsBolt(redisHost, redisPort);
+		CountWordsInCircleBolt count = new CountWordsInCircleBolt(redisHost, redisPort);
 		SplitStatusTextBolt splitText = new SplitStatusTextBolt(ignoreList, redisHost, redisPort);
 
 		builder.setBolt("coords", coords, 4)
