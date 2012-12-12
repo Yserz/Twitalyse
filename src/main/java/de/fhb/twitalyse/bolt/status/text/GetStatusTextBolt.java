@@ -61,9 +61,13 @@ public class GetStatusTextBolt extends BaseRichBolt {
 			Status ts = gson.fromJson(json, Status.class);
 
 			LOGGER.log(Level.INFO, "GetStatusTextBolt Extracted Status Text: {0}", ts.text);
-
-			collector.emit(input, new Values(id, ts.text));
-			collector.ack(input);
+			if(ts.user.lang.equals("en")){
+				collector.emit(input, new Values(id, ts.text));
+				collector.ack(input);
+			}else{
+				collector.ack(input);
+			}
+			
 		} catch (RuntimeException re) {
 			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
 					new Object[]{re, re.getMessage(), re.getCause(), json});

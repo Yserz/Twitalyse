@@ -1,9 +1,11 @@
 package de.fhb.twitalyse;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -54,5 +56,16 @@ public class PropertyTest{
 		jedis.connect();
 		jedis.disconnect();
 	}
+	
+	@Test
+	public void ignoreWordsTest() throws IOException{
+		PropertyLoader propLoader = new PropertyLoader();
+		String ignoreWords = propLoader.loadSystemProperty(
+				"ignoreWords.properties").getProperty("ignoreWords");
+		List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
+		System.out.println(ignoreList);
+		System.out.println(ignoreWords.contains("the"));
+	}
+	
 
 }

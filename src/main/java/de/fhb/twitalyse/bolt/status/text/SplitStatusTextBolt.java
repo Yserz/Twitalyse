@@ -66,27 +66,17 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 		String text = input.getString(1);
 		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Text: {0}", text);
 
-		text = text.toLowerCase();
-		//Clean up text
-		for (String wordToIgnore : ignoreWords) {
-			wordToIgnore = " " +wordToIgnore +" ";
-			text = text.replaceAll(wordToIgnore, "");
-		}
-		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt filtered Text: {0}", text);
-
 		//Split text
-		text = text.trim();
+		text = text.toLowerCase().trim();
 		List<String> splittedText = Arrays.asList(text.split(" "));
-
 
 		Date today = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
-
+		
 		for (String word : splittedText) {
-
 			word = word.trim();
-			if (!word.equals("") && word.length() >= 3) {
-
+			if (!word.equals("") && word.length() >= 3 && !ignoreWords.contains(word)) {
+				
 				// Saves # of all words
 				this.incr("#words_full");
 				// Saves # of words of today

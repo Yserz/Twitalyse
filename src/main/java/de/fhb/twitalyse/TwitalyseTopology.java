@@ -20,15 +20,20 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
+import com.google.common.collect.Sets;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -87,10 +92,10 @@ public class TwitalyseTopology {
 		
 		
 		// New York
-//		Point centerPoint =  new Point(40.712134, -74.004988);
+		Point centerPoint =  new Point(40.712134, -74.004988);
 		// Mitte EU
-		Point centerPoint = new Point(49.124219, 5.882080);
-		double radius = 1000;
+//		Point centerPoint = new Point(49.124219, 5.882080);
+		double radius = 3000;
 		GetCoordsBolt coords = new GetCoordsBolt();
 		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius, redisHost, redisPort);
 		SplitStatusTextBolt splitText = new SplitStatusTextBolt(ignoreList, redisHost, redisPort);
@@ -184,7 +189,7 @@ public class TwitalyseTopology {
 		String ignoreWords = propLoader.loadSystemProperty(
 				"ignoreWords.properties").getProperty("ignoreWords");
 		ignoreList = Arrays.asList(ignoreWords.split(";"));
-
+		
 		Properties redisProps = propLoader
 				.loadSystemProperty("redisProps.properties");
 		redisHost = redisProps.getProperty("host");
