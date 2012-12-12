@@ -69,6 +69,7 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 		text = text.toLowerCase();
 		//Clean up text
 		for (String wordToIgnore : ignoreWords) {
+			wordToIgnore = " " +wordToIgnore +" ";
 			text = text.replaceAll(wordToIgnore, "");
 		}
 		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt filtered Text: {0}", text);
