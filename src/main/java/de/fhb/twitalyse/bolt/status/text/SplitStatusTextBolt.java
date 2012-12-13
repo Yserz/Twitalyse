@@ -46,7 +46,6 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 
 	private final static Logger LOGGER = Logger.getLogger(SplitStatusTextBolt.class.getName());
 
-	private OutputCollector collector;
 	private Collection<String> ignoreWords;
 
 	public SplitStatusTextBolt(Collection<String> ignoreList, String host, int port) {

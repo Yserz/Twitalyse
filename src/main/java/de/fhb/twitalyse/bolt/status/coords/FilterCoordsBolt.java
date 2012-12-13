@@ -25,7 +25,7 @@ public class FilterCoordsBolt extends BaseRedisBolt {
 	 * 
 	 */
 	private static final long serialVersionUID = 6617639744490449642L;
-	private OutputCollector collector;
+	
 	private Point centerPoint;
 	private double radius;
 
