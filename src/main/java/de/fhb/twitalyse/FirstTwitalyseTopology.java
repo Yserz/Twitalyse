@@ -58,7 +58,7 @@ public class FirstTwitalyseTopology {
 
 
         // get ignoredWords
-        String ignoreWords = propLoader.loadSystemProperty("ignoreWords.properties").getProperty("ignoreWords");
+        String ignoreWords = propLoader.loadSystemProperty("stopWords.properties").getProperty("ignoreWords");
         List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
 
 

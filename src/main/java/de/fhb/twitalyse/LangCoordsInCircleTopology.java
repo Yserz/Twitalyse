@@ -128,7 +128,7 @@ public class LangCoordsInCircleTopology {
 		tokenSecret = twitterProps.getProperty("tokenSecret");
 
 		String ignoreWords = propLoader.loadSystemProperty(
-				"ignoreWords.properties").getProperty("ignoreWords");
+				"stopWords.properties").getProperty("ignoreWords");
 		ignoreList = Arrays.asList(ignoreWords.split(";"));
 
 		Properties redisProps = propLoader
