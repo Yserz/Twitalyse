@@ -20,8 +20,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -67,7 +69,7 @@ public class TwitalyseTopology {
 	private String consumerKey;
 	private String consumerKeySecure;
 	private final int DEFAULT_NUMBEROFWORKERS = 4;
-	private List<String> ignoreList;
+	private Collection<String> stopWords;
 	private String redisHost;
 	private int redisPort;
 	private String token;
@@ -98,7 +100,7 @@ public class TwitalyseTopology {
 		double radius = 3000;
 		GetCoordsBolt coords = new GetCoordsBolt();
 		FilterCoordsBolt filterCoords = new FilterCoordsBolt(centerPoint, radius, redisHost, redisPort);
-		SplitStatusTextBolt splitText = new SplitStatusTextBolt(ignoreList, redisHost, redisPort);
+		SplitStatusTextBolt splitText = new SplitStatusTextBolt(stopWords, redisHost, redisPort);
 		CountWordsInCircleBolt count = new CountWordsInCircleBolt(redisHost, redisPort);
 		
 
@@ -185,11 +187,13 @@ public class TwitalyseTopology {
 		consumerKeySecure = twitterProps.getProperty("consumerKeySecure");
 		token = twitterProps.getProperty("token");
 		tokenSecret = twitterProps.getProperty("tokenSecret");
-
-		String ignoreWords = propLoader.loadSystemProperty(
-				"ignoreWords.properties").getProperty("ignoreWords");
-		ignoreList = Arrays.asList(ignoreWords.split(";"));
 		
+		Enumeration<Object> enumOfStopWords = propLoader.loadSystemProperty("ignoreWords.properties").elements();
+		while (enumOfStopWords.hasMoreElements()) {
+			String stopWordsLang = (String) enumOfStopWords.nextElement();
+			stopWords.addAll(Sets.newHashSet(stopWordsLang.split(";")));
+		}
+				
 		Properties redisProps = propLoader
 				.loadSystemProperty("redisProps.properties");
 		redisHost = redisProps.getProperty("host");
@@ -217,7 +221,7 @@ public class TwitalyseTopology {
 	private void initWordCount() {
 		GetStatusTextBolt getTextBolt = new GetStatusTextBolt();
 		SplitStatusTextBolt splitStatusTextBolt = new SplitStatusTextBolt(
-				ignoreList, redisHost, redisPort);
+				stopWords, redisHost, redisPort);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(redisHost, redisPort);
 
 		builder.setBolt("4_1 getTextBolt", getTextBolt).allGrouping(
@@ -253,15 +257,15 @@ public class TwitalyseTopology {
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		} else {
-			conf.setMaxTaskParallelism(3);
-
+			conf.setMaxTaskParallelism(4);
+			conf.setNumWorkers(DEFAULT_NUMBEROFWORKERS);
 			LocalCluster cluster = new LocalCluster();
 			LOGGER.log(Level.SEVERE,"Starting Cluster......");
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());
 			
-			Thread.sleep(20000);
+//			Thread.sleep(20000);
 
-			cluster.shutdown();
+//			cluster.shutdown();
 		}
 	}
 

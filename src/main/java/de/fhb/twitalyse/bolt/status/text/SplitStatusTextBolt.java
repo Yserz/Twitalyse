@@ -18,6 +18,7 @@ package de.fhb.twitalyse.bolt.status.text;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +47,11 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 	private final static Logger LOGGER = Logger.getLogger(SplitStatusTextBolt.class.getName());
 
 	private OutputCollector collector;
-	private List<String> ignoreWords;
+	private Collection<String> ignoreWords;
 
-	public SplitStatusTextBolt(List<String> ignoreWords, String host, int port) {
+	public SplitStatusTextBolt(Collection<String> ignoreList, String host, int port) {
 		super(host, port);
-		this.ignoreWords = ignoreWords;
+		this.ignoreWords = ignoreList;
 	}
 
 	@Override
