@@ -189,6 +189,7 @@ public class TwitalyseTopology {
 		tokenSecret = twitterProps.getProperty("tokenSecret");
 		
 		Enumeration<Object> enumOfStopWords = propLoader.loadSystemProperty("ignoreWords.properties").elements();
+		stopWords = new HashSet<String>();
 		while (enumOfStopWords.hasMoreElements()) {
 			String stopWordsLang = (String) enumOfStopWords.nextElement();
 			stopWords.addAll(Sets.newHashSet(stopWordsLang.split(";")));
