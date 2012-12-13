@@ -5,10 +5,15 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
+
+import com.google.common.collect.Sets;
 
 import redis.clients.jedis.Jedis;
 import twitter4j.TwitterException;
@@ -58,13 +63,15 @@ public class PropertyTest{
 	}
 	
 	@Test
-	public void ignoreWordsTest() throws IOException{
+	public void stopWordsTest() throws IOException{
 		PropertyLoader propLoader = new PropertyLoader();
-		String ignoreWords = propLoader.loadSystemProperty(
-				"ignoreWords.properties").getProperty("ignoreWords");
-		List<String> ignoreList = Arrays.asList(ignoreWords.split(";"));
-		System.out.println(ignoreList);
-		System.out.println(ignoreWords.contains("the"));
+		Enumeration<Object> enumOfStopWords = propLoader.loadSystemProperty("stopWords.properties").elements();
+		Collection<String> stopWords = new HashSet<String>();
+		while (enumOfStopWords.hasMoreElements()) {
+			String stopWordsLang = (String) enumOfStopWords.nextElement();
+			stopWords.addAll(Sets.newHashSet(stopWordsLang.split(";")));
+		}
+		System.out.println(stopWords);
 	}
 	
 
