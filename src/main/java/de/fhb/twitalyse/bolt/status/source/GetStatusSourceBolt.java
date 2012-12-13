@@ -51,6 +51,7 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 		} catch (RuntimeException re) {
 			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
 					new Object[]{re, re.getMessage(), re.getCause(), json});
+			collector.fail(input);
 		}
 
 	}
