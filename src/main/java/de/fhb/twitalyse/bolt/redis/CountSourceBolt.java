@@ -19,7 +19,7 @@ package de.fhb.twitalyse.bolt.redis;
 import backtype.storm.tuple.Tuple;
 
 /**
- *
+ * 
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class CountSourceBolt extends BaseRedisBolt {
@@ -35,11 +35,16 @@ public class CountSourceBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
-		String source = input.getString(1);
-		System.out.println("CountSourceBolt Word: " + source);
+		try {
+			long id = input.getLong(0);
+			String source = input.getString(1);
+			System.out.println("CountSourceBolt Word: " + source);
 
-		this.zincrby("sources", 1d, source);
-		this.collector.ack(input);
+			this.zincrby("sources", 1d, source);
+			this.collector.ack(input);
+
+		} catch (Exception e) {
+			this.collector.fail(input);
+		}
 	}
 }

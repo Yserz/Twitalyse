@@ -35,7 +35,7 @@ import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
 
 /**
  * This Bolt analyses the given Twitter Status Text.
- *
+ * 
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class SplitStatusTextBolt extends BaseRedisBolt {
@@ -44,48 +44,56 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 	 */
 	private static final long serialVersionUID = -7734590864277387631L;
 
-	private final static Logger LOGGER = Logger.getLogger(SplitStatusTextBolt.class.getName());
+	private final static Logger LOGGER = Logger
+			.getLogger(SplitStatusTextBolt.class.getName());
 
 	private Collection<String> ignoreWords;
 
-	public SplitStatusTextBolt(Collection<String> ignoreList, String host, int port) {
+	public SplitStatusTextBolt(Collection<String> ignoreList, String host,
+			int port) {
 		super(host, port);
 		this.ignoreWords = ignoreList;
 	}
 
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map stormConf, TopologyContext context,
+			OutputCollector collector) {
 		super.prepare(stormConf, context, collector);
 		this.collector = collector;
 	}
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
-		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Status ID: {0}", id);
-		String text = input.getString(1);
-		LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Text: {0}", text);
+		try {
 
-		//Split text
-		text = text.toLowerCase().trim();
-		List<String> splittedText = Arrays.asList(text.split(" "));
+			long id = input.getLong(0);
+			LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Status ID: {0}", id);
+			String text = input.getString(1);
+			LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Text: {0}", text);
 
-		Date today = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
-		
-		for (String word : splittedText) {
-			word = word.trim();
-			if (!word.equals("")) {
-				// Saves # of all words
-				this.incr("#words_full");
-				// Saves # of words of today
-				this.incr("#words_full_" + sdf.format(today));
-				if (word.length() >= 3 && !ignoreWords.contains(word)) {
-					collector.emit(input, new Values(id, word));
+			// Split text
+			text = text.toLowerCase().trim();
+			List<String> splittedText = Arrays.asList(text.split(" "));
+
+			Date today = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+
+			for (String word : splittedText) {
+				word = word.trim();
+				if (!word.equals("")) {
+					// Saves # of all words
+					this.incr("#words_full");
+					// Saves # of words of today
+					this.incr("#words_full_" + sdf.format(today));
+					if (word.length() >= 3 && !ignoreWords.contains(word)) {
+						collector.emit(input, new Values(id, word));
+					}
 				}
 			}
+			collector.ack(input);
+		} catch (Exception e) {
+			this.collector.fail(input);
 		}
-		collector.ack(input);
 	}
 
 	@Override

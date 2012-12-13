@@ -7,9 +7,9 @@ import backtype.storm.tuple.Tuple;
 
 /**
  * @author Christoph Ott <ott@fh-brandenburg.de>
- *
+ * 
  */
-public class CountWordsInCircleBolt extends BaseRedisBolt{
+public class CountWordsInCircleBolt extends BaseRedisBolt {
 
 	/**
 	 * 
@@ -22,21 +22,26 @@ public class CountWordsInCircleBolt extends BaseRedisBolt{
 
 	@Override
 	public void execute(Tuple input) {
-		String word = input.getString(1);
+		try {
+			String word = input.getString(1);
 
-		Date today = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+			Date today = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
 
-		// Saves all words of today
-		this.zincrby("coordswords_" + sdf.format(today), 1d, word);
-		// Saves all words
-		this.zincrby("coordswords", 1d, word);
-		// Saves # of filtered words
-		this.incr("#coordswords_filtered");
-		// Saves # of filtered words of today
-		this.incr("#coordswords_filtered_" + sdf.format(today));
-		
-		this.collector.ack(input);
+			// Saves all words of today
+			this.zincrby("coordswords_" + sdf.format(today), 1d, word);
+			// Saves all words
+			this.zincrby("coordswords", 1d, word);
+			// Saves # of filtered words
+			this.incr("#coordswords_filtered");
+			// Saves # of filtered words of today
+			this.incr("#coordswords_filtered_" + sdf.format(today));
+
+			this.collector.ack(input);
+
+		} catch (Exception e) {
+			this.collector.fail(input);
+		}
 	}
 
 }

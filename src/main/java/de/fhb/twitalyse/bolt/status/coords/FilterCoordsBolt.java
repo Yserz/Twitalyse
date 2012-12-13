@@ -19,13 +19,14 @@ import de.fhb.twitalyse.utils.Point;
  * 
  */
 public class FilterCoordsBolt extends BaseRedisBolt {
-	private final static Logger LOGGER = Logger.getLogger(FilterCoordsBolt.class.getName());
+	private final static Logger LOGGER = Logger
+			.getLogger(FilterCoordsBolt.class.getName());
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6617639744490449642L;
-	
+
 	private Point centerPoint;
 	private double radius;
 
@@ -45,16 +46,21 @@ public class FilterCoordsBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		Point p = new Point(input.getFloat(1), input.getFloat(2));
+		try {
 
-		if (CalcCoordinates.isPointInCircle(centerPoint, p, radius)) {
-			this.incr("#stati_inCircle");
-			this.collector.emit(input,
-					new Values(input.getLong(0), input.getString(3)));
-			this.collector.ack(input);
-		} else {
-			LOGGER.log(Level.INFO, "is in NOT CIRCLE");
-			this.collector.ack(input);
+			Point p = new Point(input.getFloat(1), input.getFloat(2));
+
+			if (CalcCoordinates.isPointInCircle(centerPoint, p, radius)) {
+				this.incr("#stati_inCircle");
+				this.collector.emit(input,
+						new Values(input.getLong(0), input.getString(3)));
+				this.collector.ack(input);
+			} else {
+				LOGGER.log(Level.INFO, "is in NOT CIRCLE");
+				this.collector.ack(input);
+			}
+		} catch (Exception e) {
+			this.collector.fail(input);
 		}
 	}
 

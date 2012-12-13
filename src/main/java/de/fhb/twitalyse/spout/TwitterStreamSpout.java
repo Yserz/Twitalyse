@@ -132,10 +132,11 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 				// Status ID + Status-JSON
 				collector.emit(new Values(value.get(0), value.get(1)), id);
-
+				ack(id);
 				jedis.disconnect();
 			} catch (JedisException e) {
 				LOGGER.log(Level.SEVERE, "Exception: {0}", e);
+				fail(id);
 			}
 
 		}

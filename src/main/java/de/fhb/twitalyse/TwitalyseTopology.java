@@ -246,7 +246,7 @@ public class TwitalyseTopology {
 	public void startTopology(String[] args) throws AlreadyAliveException,
 			InvalidTopologyException, InterruptedException {
 		Config conf = new Config();
-		conf.setDebug(false);
+		conf.setDebug(true);
 
 		if (args != null && args.length > 0) {
 			if (args.length > 1) {
@@ -258,8 +258,8 @@ public class TwitalyseTopology {
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		} else {
-			conf.setMaxTaskParallelism(4);
-			conf.setNumWorkers(DEFAULT_NUMBEROFWORKERS);
+			conf.setMaxTaskParallelism(1);
+			conf.setNumWorkers(1);
 			LocalCluster cluster = new LocalCluster();
 			LOGGER.log(Level.SEVERE,"Starting Cluster......");
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());

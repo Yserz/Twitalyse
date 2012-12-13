@@ -23,7 +23,7 @@ import backtype.storm.tuple.Tuple;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
- *
+ * 
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class CountWordsBolt extends BaseRedisBolt {
@@ -39,22 +39,27 @@ public class CountWordsBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		long id = input.getLong(0);
-		String word = input.getString(1);
-		System.out.println("CountWordsBolt Word: " + word);
+		try {
+			long id = input.getLong(0);
+			String word = input.getString(1);
+			System.out.println("CountWordsBolt Word: " + word);
 
-		Date today = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+			Date today = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
 
-		// Saves all words of today
-		this.zincrby("words_" + sdf.format(today), 1d, word);
-		// Saves all words
-		this.zincrby("words", 1d, word);
-		// Saves # of filtered words
-		this.incr("#words_filtered");
-		// Saves # of filtered words of today
-		this.incr("#words_filtered_" + sdf.format(today));
+			// Saves all words of today
+			this.zincrby("words_" + sdf.format(today), 1d, word);
+			// Saves all words
+			this.zincrby("words", 1d, word);
+			// Saves # of filtered words
+			this.incr("#words_filtered");
+			// Saves # of filtered words of today
+			this.incr("#words_filtered_" + sdf.format(today));
 
-		this.collector.ack(input);
+			this.collector.ack(input);
+
+		} catch (Exception e) {
+			this.collector.fail(input);
+		}
 	}
 }

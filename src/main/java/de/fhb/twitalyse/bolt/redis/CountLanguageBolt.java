@@ -31,12 +31,17 @@ public class CountLanguageBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		Long id = input.getLong(0);
-		String language = input.getString(1);
-		System.out.println("CountLanguageBolt Language: " + language);
+		try {
 
-		this.zincrby("languages", 1d, language);
-		this.collector.ack(input);
+			Long id = input.getLong(0);
+			String language = input.getString(1);
+			System.out.println("CountLanguageBolt Language: " + language);
 
+			this.zincrby("languages", 1d, language);
+			this.collector.ack(input);
+
+		} catch (Exception e) {
+			this.collector.fail(input);
+		}
 	}
 }
