@@ -33,12 +33,14 @@ import backtype.storm.topology.TopologyBuilder;
 
 import com.google.common.collect.Sets;
 
+import de.fhb.twitalyse.bolt.redis.CountHashTagsBolt;
 import de.fhb.twitalyse.bolt.redis.CountLanguageBolt;
 import de.fhb.twitalyse.bolt.redis.CountSourceBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsBolt;
 import de.fhb.twitalyse.bolt.redis.CountWordsInCircleBolt;
 import de.fhb.twitalyse.bolt.status.coords.FilterCoordsBolt;
 import de.fhb.twitalyse.bolt.status.coords.GetCoordsBolt;
+import de.fhb.twitalyse.bolt.status.hashtag.GetHashTagsBolt;
 import de.fhb.twitalyse.bolt.status.source.GetStatusSourceBolt;
 import de.fhb.twitalyse.bolt.status.text.GetStatusTextBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
@@ -77,6 +79,18 @@ public class TwitalyseTopology {
 		initWordCount();
 		initLanguageCount();
 		initGetCoordsInCircle();
+		initGetHashTags();
+	}
+
+	private void initGetHashTags() {
+		GetHashTagsBolt getHashTag = new GetHashTagsBolt();
+		CountHashTagsBolt countHashTags = new CountHashTagsBolt(redisHost,
+				redisPort);
+
+		builder.setBolt("5_1 getHashTags", getHashTag, 4).shuffleGrouping(
+				TWITTERSPOUT);
+		builder.setBolt("5_2 countHashTags", countHashTags, 4).shuffleGrouping(
+				"5_1 getHashTags");
 	}
 
 	private void initGetCoordsInCircle() {
@@ -101,7 +115,6 @@ public class TwitalyseTopology {
 				"1_2 coordsInCircle");
 		builder.setBolt("1_4 countWordsInCircle", count, 8).shuffleGrouping(
 				"1_3 splitText");
-
 	}
 
 	private void initLanguageCount() {
