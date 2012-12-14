@@ -1,12 +1,13 @@
 package de.fhb.twitalyse;
 
-import de.fhb.twitalyse.utils.CalcCoordinates;
-import de.fhb.twitalyse.utils.Point;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+
+import de.fhb.twitalyse.utils.CalcCoordinates;
+import de.fhb.twitalyse.utils.Point;
 public class CalcCoordinatesTest {
 
 	
@@ -28,11 +29,8 @@ public class CalcCoordinatesTest {
 	@Test
 	public void test() {
 		Point notInRange = new Point(10, 10);
-		CalcCoordinates calculator = new CalcCoordinates();
-		System.out.println("distance in km: "+ calculator.distanceInKm(berlin, brandenburg));
-		assertTrue(calculator.isPointInCircle(berlin, brandenburg, radius));
-		assertFalse(calculator.isPointInCircle(berlin, notInRange, radius));
+		System.out.println("distance in km: "+ CalcCoordinates.distanceInKm(berlin, brandenburg));
+		assertTrue(CalcCoordinates.isPointInCircle(berlin, brandenburg, radius));
+		assertFalse(CalcCoordinates.isPointInCircle(berlin, notInRange, radius));
 	}
-	
-
 }

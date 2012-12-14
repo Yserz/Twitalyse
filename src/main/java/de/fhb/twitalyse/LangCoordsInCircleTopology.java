@@ -26,6 +26,7 @@ import de.fhb.twitalyse.bolt.status.coords.GetCoordsBolt;
 import de.fhb.twitalyse.bolt.status.text.SplitStatusTextBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import de.fhb.twitalyse.utils.Point;
+import de.fhb.twitalyse.utils.PropertyLoader;
 
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
