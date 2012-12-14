@@ -31,6 +31,7 @@ import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 
 import de.fhb.twitalyse.bolt.data.Status;
+import org.mortbay.log.Log;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
@@ -42,8 +43,6 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	 * 
 	 */
 	private static final long serialVersionUID = 6427253027765292007L;
-	private final static Logger LOGGER = Logger
-			.getLogger(GetStatusTextBolt.class.getName());
 	private OutputCollector collector;
 
 	@Override
@@ -55,22 +54,20 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		Long id = input.getLong(0);
-		LOGGER.log(Level.INFO, "GetStatusTextBolt Status ID: {0}", id);
+		Log.info("GetStatusTextBolt Status ID: {0}", id);
 		String json = input.getString(1);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			LOGGER.log(Level.INFO,
-					"GetStatusTextBolt Extracted Status Text: {0}", ts.text);
+			Log.info("GetStatusTextBolt Extracted Status Text: {0}", ts.text);
 
 			collector.emit(input, new Values(id, ts.text));
 			collector.ack(input);
 
 		} catch (RuntimeException re) {
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}",
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}",
 					new Object[] { re, re.getMessage(), re.getCause(), json });
 			collector.fail(input);
 		}

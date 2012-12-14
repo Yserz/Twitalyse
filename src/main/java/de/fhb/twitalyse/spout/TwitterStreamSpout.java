@@ -45,12 +45,13 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.InprocMessaging;
 import backtype.storm.utils.Utils;
+import org.mortbay.log.Log;
 
 /**
  * This Spout connects to the Twitter API and opens up a Stream. The Spout
  * listens for new Twitter Stati posted on the public Twitter Channel and push
  * it in the System.
- * 
+ *
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class TwitterStreamSpout implements IRichSpout, StatusListener {
@@ -118,10 +119,7 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 			id = InprocMessaging.acquireNewPort();
 			InprocMessaging.sendMessage(id, new Values(status.getId(), json));
 		} catch (Exception e) {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
-			jedis.hincrBy("exeptions", e.getMessage(), 1l);
-			jedis.disconnect();
+			Log.warn(e);
 		}
 	}
 
@@ -149,15 +147,9 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 				jedis.disconnect();
 			}
 		} catch (Exception e) {
-			Jedis jedis = new Jedis(host, port);
-			jedis.getClient().setTimeout(9999);
-			jedis.hincrBy("exeptions", e.getMessage(), 1l);
-			jedis.disconnect();
-			// }catch (JedisException e) {
-			// LOGGER.log(Level.SEVERE, "Exception: {0}", e);
-			// fail(id);
+			Log.warn(e);
 		}
-
+		
 	}
 
 	@Override
@@ -167,8 +159,11 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	@Override
 	public void ack(Object msgId) {
+		
 		if (ackFailDelegate != null) {
 			ackFailDelegate.ack(msgId);
+		}else {
+			Log.warn("ackfaildelegeate = null");
 		}
 	}
 
@@ -176,91 +171,68 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	public void fail(Object msgId) {
 		if (ackFailDelegate != null) {
 			ackFailDelegate.fail(msgId);
+		}else {
+			Log.warn("ackfaildelegeate = null");
 		}
 	}
 
 	@Override
 	public void onException(Exception ex) {
-		Jedis jedis = new Jedis(host, port);
-		jedis.getClient().setTimeout(9999);
-		jedis.hincrBy("exeptions", ex.getMessage(), 1l);
-		jedis.disconnect();
+		Log.warn(ex);
 		TwitterException tex = (TwitterException) ex;
 		if (400 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(
-					Level.SEVERE,
-					"Rate limit texceeded. Clients may not make more than {0} requests per hour. \nThe ntext reset is {1}",
-					new Object[] { tex.getRateLimitStatus().getHourlyLimit(),
-							tex.getRateLimitStatus().getResetTime() });
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Rate limit texceeded. Clients may not make more than {0} requests per hour. \nThe ntext reset is {1}",
+					new Object[]{tex.getRateLimitStatus().getHourlyLimit(),
+						tex.getRateLimitStatus().getResetTime()});
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (401 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE,
-					"Authentication credentials were missing or incorrect.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Authentication credentials were missing or incorrect.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (403 == tex.getStatusCode()) {
-			LOGGER.log(Level.SEVERE, "Duplicated status.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Duplicated status.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (404 == tex.getStatusCode()) {
-			LOGGER.log(
-					Level.SEVERE,
-					"The URI requested is invalid or the resource requested, such as a user, does not exists.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("The URI requested is invalid or the resource requested, such as a user, does not exists.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (406 == tex.getStatusCode()) {
-			LOGGER.log(Level.SEVERE,
-					"Request returned - invalid format is specified in the request.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Request returned - invalid format is specified in the request.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (420 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE,
-					"Too many logins with your account in a short time.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Too many logins with your account in a short time.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (500 == tex.getStatusCode()) {
-			LOGGER.log(
-					Level.SEVERE,
-					"Something is broken. Please post to the group so the Twitter team can investigate.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Something is broken. Please post to the group so the Twitter team can investigate.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (502 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE, "Twitter is down or being upgraded.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Twitter is down or being upgraded.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (503 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE,
-					"The Twitter servers are up, but overloaded with requests. Try again later.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("The Twitter servers are up, but overloaded with requests. Try again later.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else if (-1 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE,
-					"Can not connect to the internet or the host is down.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Can not connect to the internet or the host is down.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		} else {
 			close();
-			LOGGER.log(Level.SEVERE, "Unknown twitter-error occured.");
-			LOGGER.log(Level.SEVERE,
-					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
-							tex, tex.getMessage(), tex.getCause() });
+			Log.warn("Unknown twitter-error occured.");
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", new Object[]{
+						tex, tex.getMessage(), tex.getCause()});
 		}
 	}
 

@@ -16,10 +16,14 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import org.mortbay.log.Log;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
@@ -56,10 +60,16 @@ public class CountWordsBolt extends BaseRedisBolt {
 			// Saves # of filtered words of today
 			this.incr("#words_filtered_" + sdf.format(today));
 
-//			this.collector.ack(input);
+			this.collector.emit(input, new Values(input.getLong(0)));
+			this.collector.ack(input);
 
 		} catch (Exception e) {
+			Log.warn(e);
 			this.collector.fail(input);
 		}
+	}
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("id"));
 	}
 }

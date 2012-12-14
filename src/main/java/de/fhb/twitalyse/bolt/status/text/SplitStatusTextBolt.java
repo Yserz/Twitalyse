@@ -32,6 +32,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
+import org.mortbay.log.Log;
 
 /**
  * This Bolt analyses the given Twitter Status Text.
@@ -43,9 +44,6 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 	 * 
 	 */
 	private static final long serialVersionUID = -7734590864277387631L;
-
-	private final static Logger LOGGER = Logger
-			.getLogger(SplitStatusTextBolt.class.getName());
 
 	private Collection<String> ignoreWords;
 
@@ -67,9 +65,9 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 		try {
 
 			long id = input.getLong(0);
-			LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Status ID: {0}", id);
+			Log.info("AnalyseStatusTextBolt Status ID: {0}", id);
 			String text = input.getString(1);
-			LOGGER.log(Level.INFO, "AnalyseStatusTextBolt Text: {0}", text);
+			Log.info("AnalyseStatusTextBolt Text: {0}", text);
 
 			// Split text
 			text = text.toLowerCase().trim();
@@ -92,13 +90,13 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 			}
 			collector.ack(input);
 		} catch (Exception e) {
+			Log.warn(e);
 			this.collector.fail(input);
 		}
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		super.declareOutputFields(declarer);
 		declarer.declare(new Fields("id", "word"));
 	}
 }

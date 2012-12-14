@@ -19,15 +19,11 @@ package de.fhb.twitalyse;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -56,6 +52,8 @@ import de.fhb.twitalyse.bolt.status.user.GetLanguageBolt;
 import de.fhb.twitalyse.spout.TwitterStreamSpout;
 import de.fhb.twitalyse.utils.Point;
 
+import org.mortbay.log.Log;
+
 /**
  * This Topology analyses Twitter Stati posted on the Twitter Public Channel.
  * 
@@ -76,7 +74,8 @@ public class TwitalyseTopology {
 	private String tokenSecret;
 
 	public TwitalyseTopology() throws IOException {
-		initLogger();
+//		initLogger();
+		System.out.println("Logger Debug enabled?: "+Log.isDebugEnabled());
 		initProperties();
 		initBuilder();
 	}
@@ -87,7 +86,7 @@ public class TwitalyseTopology {
 		initSourceCount();
 //		initWordCount();
 //		initLanguageCount();
-//		initGetCoordsInCircle();
+		initGetCoordsInCircle();
 	}
 	
 	private void initGetCoordsInCircle() {
@@ -133,7 +132,7 @@ public class TwitalyseTopology {
 		if (chandler != null) {
 			chandler.setLevel(consoleHandlerLevel);
 		} else {
-			LOGGER.log(Level.SEVERE, "No ConsoleHandler there.");
+			Log.warn("No ConsoleHandler there.");
 		}
 
 		//setting up FileHandler
@@ -149,16 +148,16 @@ public class TwitalyseTopology {
 				fh.setFormatter(new SimpleFormatter());
 				fh.setLevel(fileHandlerLevel);
 			} catch (IOException ex1) {
-				System.err.println("Input-output-error while creating the initial log.");
-				LOGGER.log(Level.SEVERE, null, ex1);
+				Log.warn("Input-output-error while creating the initial log.");
+				Log.warn(ex1);
 			} catch (SecurityException ex1) {
-				LOGGER.log(Level.SEVERE, null, ex1);
+				Log.warn(ex1);
 			}
-			LOGGER.log(Level.SEVERE, null, ex);
+			Log.warn(ex);
 
 		} catch (SecurityException ex) {
-			System.err.println("Cannot open/access Log-Folder so I will not log anything.");
-			LOGGER.log(Level.SEVERE, null, ex);
+			Log.warn("Cannot open/access Log-Folder so I will not log anything.");
+			Log.warn(ex);
 		}
 
 		if (fh != null) {
@@ -254,14 +253,14 @@ public class TwitalyseTopology {
 			} else {
 				conf.setNumWorkers(DEFAULT_NUMBEROFWORKERS);
 			}
-			LOGGER.log(Level.SEVERE,"Starting Cluster......");
+			Log.warn("Starting Cluster......");
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		} else {
 			conf.setMaxTaskParallelism(1);
 			conf.setNumWorkers(1);
 			LocalCluster cluster = new LocalCluster();
-			LOGGER.log(Level.SEVERE,"Starting Cluster......");
+			Log.warn("Starting Cluster......");
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());
 			
 //			Thread.sleep(20000);
@@ -275,11 +274,11 @@ public class TwitalyseTopology {
 		try {
 			topology.startTopology(args);
 		} catch (AlreadyAliveException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			Log.warn("{0}\n{1}", new Object[]{e, e.getMessage()});
 		} catch (InvalidTopologyException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			Log.warn("{0}\n{1}", new Object[]{e, e.getMessage()});
 		} catch (InterruptedException e) {
-			LOGGER.log(Level.SEVERE, "{0}\n{1}", new Object[]{e, e.getMessage()});
+			Log.warn("{0}\n{1}", new Object[]{e, e.getMessage()});
 		}
 	}
 }

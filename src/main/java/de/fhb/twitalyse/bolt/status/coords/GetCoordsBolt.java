@@ -15,13 +15,13 @@ import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 
 import de.fhb.twitalyse.bolt.data.Status;
+import org.mortbay.log.Log;
 
 /**
  * @author Christoph Ott <ott@fh-brandenburg.de>
  *
  */
 public class GetCoordsBolt extends BaseRichBolt {
-	private final static Logger LOGGER = Logger.getLogger(GetCoordsBolt.class.getName());
 
 	/**
 	 *
@@ -55,7 +55,7 @@ public class GetCoordsBolt extends BaseRichBolt {
 			collector.ack(input);
 
 		} catch (RuntimeException re) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
 					new Object[]{re, re.getMessage(), re.getCause(), json});
 			collector.fail(input);
 		}

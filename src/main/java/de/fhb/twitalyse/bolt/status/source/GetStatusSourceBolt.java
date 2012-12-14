@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 
 import de.fhb.twitalyse.bolt.data.Status;
 import de.fhb.twitalyse.utils.TwitterUtils;
+import org.mortbay.log.Log;
 
 /**
  * This Bolt gets the Twitter Status Source out of the whole Status.
@@ -25,7 +26,6 @@ import de.fhb.twitalyse.utils.TwitterUtils;
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class GetStatusSourceBolt extends BaseRichBolt {
-	private final static Logger LOGGER = Logger.getLogger(GetStatusSourceBolt.class.getName());
 
 	private OutputCollector collector;
 
@@ -37,30 +37,25 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		Long id = input.getLong(0);
-		LOGGER.log(Level.INFO, "GetStatusSourceBolt Status ID: {0}", id);
+		Log.info("GetStatusSourceBolt Status ID: {0}", id);
 		String json = input.getString(1);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			LOGGER.log(Level.INFO, "GetStatusSourceBolt Extracted Source Text: {0}", ts.source);
+			Log.info("GetStatusSourceBolt Extracted Source Text: {0}", ts.source);
 			
 			String source = TwitterUtils.findSource(ts.source);
 
 			collector.emit(input, new Values(id, source));
-//			collector.ack(input);
-		} catch (Exception e) {
-			Jedis jedis = new Jedis("ec2-176-34-93-46.eu-west-1.compute.amazonaws.com", 6379);
-			jedis.getClient().setTimeout(9999);
-			jedis.hincrBy("exeptions", e.getMessage(), 1l);
-			jedis.disconnect();
+			collector.ack(input);
+		
+		}catch (Exception re) {
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
+					new Object[]{re, re.getMessage(), re.getCause(), json});
+			collector.fail(input);
 		}
-//		catch (RuntimeException re) {
-//			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
-//					new Object[]{re, re.getMessage(), re.getCause(), json});
-//			collector.fail(input);
-//		}
 
 	}
 

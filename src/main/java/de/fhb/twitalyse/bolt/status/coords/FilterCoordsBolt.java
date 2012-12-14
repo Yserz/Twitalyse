@@ -13,14 +13,13 @@ import backtype.storm.tuple.Values;
 import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
 import de.fhb.twitalyse.utils.CalcCoordinates;
 import de.fhb.twitalyse.utils.Point;
+import org.mortbay.log.Log;
 
 /**
  * @author Christoph Ott <ott@fh-brandenburg.de>
  * 
  */
 public class FilterCoordsBolt extends BaseRedisBolt {
-	private final static Logger LOGGER = Logger
-			.getLogger(FilterCoordsBolt.class.getName());
 
 	/**
 	 * 
@@ -56,10 +55,11 @@ public class FilterCoordsBolt extends BaseRedisBolt {
 						new Values(input.getLong(0), input.getString(3)));
 				this.collector.ack(input);
 			} else {
-				LOGGER.log(Level.INFO, "is in NOT CIRCLE");
+				Log.warn("is in NOT CIRCLE");
 				this.collector.ack(input);
 			}
 		} catch (Exception e) {
+			Log.warn(e);
 			this.collector.fail(input);
 		}
 	}

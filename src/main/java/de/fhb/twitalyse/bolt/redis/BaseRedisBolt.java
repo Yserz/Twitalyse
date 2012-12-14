@@ -10,6 +10,7 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
+import org.mortbay.log.Log;
 
 /**
  * Some Redis Operations
@@ -18,7 +19,6 @@ import backtype.storm.topology.base.BaseRichBolt;
  *
  */
 public abstract class BaseRedisBolt extends BaseRichBolt {
-	private final static Logger LOGGER = Logger.getLogger(BaseRedisBolt.class.getName());
 
 	protected OutputCollector collector;
 	private String host;
@@ -42,7 +42,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.zincrby(key, score, member);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", 
 					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
@@ -56,7 +56,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incr(key);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", 
 					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
@@ -71,7 +71,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.incrBy(key, integer);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", 
 					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
@@ -86,14 +86,13 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.hincrBy(key, field, value);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", 
 					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
 
 	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-	}
+	public abstract void declareOutputFields(OutputFieldsDeclarer declarer);
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
@@ -102,7 +101,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 			jedis = new Jedis(host, port);
 			jedis.getClient().setTimeout(9999);
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", 
 					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}
@@ -113,7 +112,7 @@ public abstract class BaseRedisBolt extends BaseRichBolt {
 		try {
 			jedis.disconnect();
 		} catch (JedisException e) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}", 
 					new Object[]{e, e.getMessage(), e.getCause()});
 		}
 	}

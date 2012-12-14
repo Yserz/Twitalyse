@@ -16,7 +16,11 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import org.mortbay.log.Log;
 
 /**
  * 
@@ -41,12 +45,16 @@ public class CountSourceBolt extends BaseRedisBolt {
 			System.out.println("CountSourceBolt Word: " + source);
 
 			this.zincrby("sources", 1d, source);
-//			this.collector.ack(input);
+			this.collector.emit(input, new Values(input.getLong(0)));
+			this.collector.ack(input);
 
 		} catch (Exception e) {
-			
-			hincrBy("exeptions", e.getMessage(), 1l);
-//			this.collector.fail(input);
+			Log.warn(e);
+			this.collector.fail(input);
 		}
+	}
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("id"));
 	}
 }
