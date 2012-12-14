@@ -85,9 +85,9 @@ public class TwitalyseTopology {
 		builder = new TopologyBuilder();
 		initTwitterSpout();
 		initSourceCount();
-		initWordCount();
-		initLanguageCount();
-		initGetCoordsInCircle();
+//		initWordCount();
+//		initLanguageCount();
+//		initGetCoordsInCircle();
 	}
 	
 	private void initGetCoordsInCircle() {
@@ -104,10 +104,10 @@ public class TwitalyseTopology {
 		CountWordsInCircleBolt count = new CountWordsInCircleBolt(redisHost, redisPort);
 		
 
-		builder.setBolt("1_1 getCoords", coords).allGrouping(TWITTERSPOUT);
-		builder.setBolt("1_2 filterCoords", filterCoords).shuffleGrouping("1_1 getCoords");
-		builder.setBolt("1_3 splitText", splitText).shuffleGrouping("1_2 filterCoords");
-		builder.setBolt("1_4 countWordsInCircle", count).shuffleGrouping("1_3 splitText");
+		builder.setBolt("1_1 getCoords", coords, 8).allGrouping(TWITTERSPOUT);
+		builder.setBolt("1_2 filterCoords", filterCoords, 8).shuffleGrouping("1_1 getCoords");
+		builder.setBolt("1_3 splitText", splitText, 8).shuffleGrouping("1_2 filterCoords");
+		builder.setBolt("1_4 countWordsInCircle", count, 8).shuffleGrouping("1_3 splitText");
 
 	}
 	
@@ -171,9 +171,9 @@ public class TwitalyseTopology {
 		CountLanguageBolt countLanguageBolt = new CountLanguageBolt(redisHost,
 				redisPort);
 
-		builder.setBolt("2_1 getLanguageBolt", getLanguageBolt).allGrouping(
+		builder.setBolt("2_1 getLanguageBolt", getLanguageBolt, 4).allGrouping(
 				TWITTERSPOUT);
-		builder.setBolt("2_2 countLanguageBolt", countLanguageBolt)
+		builder.setBolt("2_2 countLanguageBolt", countLanguageBolt, 4)
 				.shuffleGrouping("2_1 getLanguageBolt");
 	}
 
@@ -206,9 +206,9 @@ public class TwitalyseTopology {
 		CountSourceBolt countSourceBolt = new CountSourceBolt(redisHost,
 				redisPort);
 
-		builder.setBolt("3_1 getStatusSourceBolt", getStatusSourceBolt)
-				.allGrouping(TWITTERSPOUT);
-		builder.setBolt("3_2 countSourceBolt", countSourceBolt).shuffleGrouping(
+		builder.setBolt("3_1 getStatusSourceBolt", getStatusSourceBolt, 10)
+				.noneGrouping(TWITTERSPOUT);
+		builder.setBolt("3_2 countSourceBolt", countSourceBolt, 10).shuffleGrouping(
 				"3_1 getStatusSourceBolt");
 	}
 
@@ -225,11 +225,11 @@ public class TwitalyseTopology {
 				stopWords, redisHost, redisPort);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(redisHost, redisPort);
 
-		builder.setBolt("4_1 getTextBolt", getTextBolt).allGrouping(
+		builder.setBolt("4_1 getTextBolt", getTextBolt, 8).allGrouping(
 				TWITTERSPOUT);
-		builder.setBolt("4_2 splitStatusTextBolt", splitStatusTextBolt)
+		builder.setBolt("4_2 splitStatusTextBolt", splitStatusTextBolt, 8)
 				.shuffleGrouping("4_1 getTextBolt");
-		builder.setBolt("4_3 countWordsBolt", countWordsBolt).shuffleGrouping(
+		builder.setBolt("4_3 countWordsBolt", countWordsBolt, 8).shuffleGrouping(
 				"4_2 splitStatusTextBolt");
 	}
 
@@ -247,7 +247,7 @@ public class TwitalyseTopology {
 			InvalidTopologyException, InterruptedException {
 		Config conf = new Config();
 		conf.setDebug(true);
-
+		conf.setMaxTaskParallelism(100);
 		if (args != null && args.length > 0) {
 			if (args.length > 1) {
 				conf.setNumWorkers(Integer.parseInt(args[1]));

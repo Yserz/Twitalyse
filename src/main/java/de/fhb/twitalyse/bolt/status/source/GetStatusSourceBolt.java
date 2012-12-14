@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import redis.clients.jedis.Jedis;
+
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -47,12 +49,18 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 			String source = TwitterUtils.findSource(ts.source);
 
 			collector.emit(input, new Values(id, source));
-			collector.ack(input);
-		} catch (RuntimeException re) {
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
-					new Object[]{re, re.getMessage(), re.getCause(), json});
-			collector.fail(input);
+//			collector.ack(input);
+		} catch (Exception e) {
+			Jedis jedis = new Jedis("ec2-176-34-93-46.eu-west-1.compute.amazonaws.com", 6379);
+			jedis.getClient().setTimeout(9999);
+			jedis.hincrBy("exeptions", e.getMessage(), 1l);
+			jedis.disconnect();
 		}
+//		catch (RuntimeException re) {
+//			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
+//					new Object[]{re, re.getMessage(), re.getCause(), json});
+//			collector.fail(input);
+//		}
 
 	}
 

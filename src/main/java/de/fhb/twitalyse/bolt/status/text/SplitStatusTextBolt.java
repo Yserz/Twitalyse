@@ -86,7 +86,7 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 					// Saves # of words of today
 					this.incr("#words_full_" + sdf.format(today));
 					if (word.length() >= 3 && !ignoreWords.contains(word)) {
-						collector.emit(input, new Values(id, word));
+						collector.emit(new Values(id, word));
 					}
 				}
 			}

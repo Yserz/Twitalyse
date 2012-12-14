@@ -41,10 +41,12 @@ public class CountSourceBolt extends BaseRedisBolt {
 			System.out.println("CountSourceBolt Word: " + source);
 
 			this.zincrby("sources", 1d, source);
-			this.collector.ack(input);
+//			this.collector.ack(input);
 
 		} catch (Exception e) {
-			this.collector.fail(input);
+			
+			hincrBy("exeptions", e.getMessage(), 1l);
+//			this.collector.fail(input);
 		}
 	}
 }

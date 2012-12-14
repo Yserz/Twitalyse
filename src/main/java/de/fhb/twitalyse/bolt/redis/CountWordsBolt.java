@@ -56,7 +56,7 @@ public class CountWordsBolt extends BaseRedisBolt {
 			// Saves # of filtered words of today
 			this.incr("#words_filtered_" + sdf.format(today));
 
-			this.collector.ack(input);
+//			this.collector.ack(input);
 
 		} catch (Exception e) {
 			this.collector.fail(input);

@@ -47,13 +47,13 @@ public class GetCoordsBolt extends BaseRichBolt {
 			if (ts.coordinates != null) {
 				// lat is 1
 				// lng is 0
-				collector.emit(input,
+				collector.emit(
 						new Values(id, ts.coordinates.coordinates.get(1),
 						ts.coordinates.coordinates.get(0), ts.text));
-				collector.ack(input);
-			} else {
-				collector.ack(input);
-			}
+
+			} 
+			collector.ack(input);
+
 		} catch (RuntimeException re) {
 			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
 					new Object[]{re, re.getMessage(), re.getCause(), json});

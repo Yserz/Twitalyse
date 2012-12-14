@@ -35,6 +35,7 @@ import twitter4j.TwitterStreamFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
+import backtype.storm.spout.ISpout;
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.testing.AckFailDelegate;
@@ -49,16 +50,17 @@ import backtype.storm.utils.Utils;
  * This Spout connects to the Twitter API and opens up a Stream. The Spout
  * listens for new Twitter Stati posted on the public Twitter Channel and push
  * it in the System.
- *
+ * 
  * @author Michael Koppen <koppen@fh-brandenburg.de>
  */
 public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
-	private final static Logger LOGGER = Logger.getLogger(TwitterStreamSpout.class.getName());
-	//Keys die die App identifizieren
+	private final static Logger LOGGER = Logger
+			.getLogger(TwitterStreamSpout.class.getName());
+	// Keys die die App identifizieren
 	private final String CONSUMER_KEY;
 	private final String CONSUMER_KEY_SECURE;
-	//Keys die den Account des Users identifizieren
+	// Keys die den Account des Users identifizieren
 	private final String TOKEN;
 	private final String TOKEN_SECRET;
 	private int id;
@@ -68,7 +70,8 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	private String host;
 	private int port;
 
-	public TwitterStreamSpout(String consumerKey, String consumerKeySecure, String token, String tokenSecret, String host, int port) {
+	public TwitterStreamSpout(String consumerKey, String consumerKeySecure,
+			String token, String tokenSecret, String host, int port) {
 		id = InprocMessaging.acquireNewPort();
 		this.CONSUMER_KEY = consumerKey;
 		this.CONSUMER_KEY_SECURE = consumerKeySecure;
@@ -88,14 +91,16 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	}
 
 	@Override
-	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+	public void open(Map conf, TopologyContext context,
+			SpoutOutputCollector collector) {
 		this.collector = collector;
 
-		//enable JSONStore
+		// enable JSONStore
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setJSONStoreEnabled(true);
 
-		TwitterStreamFactory twitterStreamFactory = new TwitterStreamFactory(cb.build());
+		TwitterStreamFactory twitterStreamFactory = new TwitterStreamFactory(
+				cb.build());
 		twitterStream = twitterStreamFactory.getInstance();
 
 		AccessToken givenAccessToken = new AccessToken(TOKEN, TOKEN_SECRET);
@@ -107,18 +112,27 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	@Override
 	public void onStatus(Status status) {
-		String json = DataObjectFactory.getRawJSON(status);
-		id = InprocMessaging.acquireNewPort();
-		InprocMessaging.sendMessage(id, new Values(status.getId(), json));
+		try {
+
+			String json = DataObjectFactory.getRawJSON(status);
+			id = InprocMessaging.acquireNewPort();
+			InprocMessaging.sendMessage(id, new Values(status.getId(), json));
+		} catch (Exception e) {
+			Jedis jedis = new Jedis(host, port);
+			jedis.getClient().setTimeout(9999);
+			jedis.hincrBy("exeptions", e.getMessage(), 1l);
+			jedis.disconnect();
+		}
 	}
 
 	@Override
 	public void nextTuple() {
-		List<Object> value = (List<Object>) InprocMessaging.pollMessage(id);
-		if (value == null) {
-			Utils.sleep(50);
-		} else {
-			try {
+		try {
+			List<Object> value = (List<Object>) InprocMessaging.pollMessage(id);
+			if (value == null) {
+				Utils.sleep(50);
+			} else {
+
 				Jedis jedis = new Jedis(host, port);
 				jedis.getClient().setTimeout(9999);
 
@@ -132,14 +146,18 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 				// Status ID + Status-JSON
 				collector.emit(new Values(value.get(0), value.get(1)), id);
-				ack(id);
 				jedis.disconnect();
-			} catch (JedisException e) {
-				LOGGER.log(Level.SEVERE, "Exception: {0}", e);
-				fail(id);
 			}
-
+		} catch (Exception e) {
+			Jedis jedis = new Jedis(host, port);
+			jedis.getClient().setTimeout(9999);
+			jedis.hincrBy("exeptions", e.getMessage(), 1l);
+			jedis.disconnect();
+			// }catch (JedisException e) {
+			// LOGGER.log(Level.SEVERE, "Exception: {0}", e);
+			// fail(id);
 		}
+
 	}
 
 	@Override
@@ -163,59 +181,86 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	@Override
 	public void onException(Exception ex) {
+		Jedis jedis = new Jedis(host, port);
+		jedis.getClient().setTimeout(9999);
+		jedis.hincrBy("exeptions", ex.getMessage(), 1l);
+		jedis.disconnect();
 		TwitterException tex = (TwitterException) ex;
 		if (400 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE, "Rate limit texceeded. Clients may not make more than {0} requests per hour. \nThe ntext reset is {1}", 
-					new Object[]{tex.getRateLimitStatus().getHourlyLimit(), tex.getRateLimitStatus().getResetTime()});
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(
+					Level.SEVERE,
+					"Rate limit texceeded. Clients may not make more than {0} requests per hour. \nThe ntext reset is {1}",
+					new Object[] { tex.getRateLimitStatus().getHourlyLimit(),
+							tex.getRateLimitStatus().getResetTime() });
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (401 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE, "Authentication credentials were missing or incorrect.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"Authentication credentials were missing or incorrect.");
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (403 == tex.getStatusCode()) {
 			LOGGER.log(Level.SEVERE, "Duplicated status.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (404 == tex.getStatusCode()) {
-			LOGGER.log(Level.SEVERE, "The URI requested is invalid or the resource requested, such as a user, does not exists.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(
+					Level.SEVERE,
+					"The URI requested is invalid or the resource requested, such as a user, does not exists.");
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (406 == tex.getStatusCode()) {
-			LOGGER.log(Level.SEVERE, "Request returned - invalid format is specified in the request.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"Request returned - invalid format is specified in the request.");
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (420 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE, "Too many logins with your account in a short time.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"Too many logins with your account in a short time.");
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (500 == tex.getStatusCode()) {
-			LOGGER.log(Level.SEVERE, "Something is broken. Please post to the group so the Twitter team can investigate.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(
+					Level.SEVERE,
+					"Something is broken. Please post to the group so the Twitter team can investigate.");
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (502 == tex.getStatusCode()) {
 			close();
 			LOGGER.log(Level.SEVERE, "Twitter is down or being upgraded.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (503 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE, "The Twitter servers are up, but overloaded with requests. Try again later.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"The Twitter servers are up, but overloaded with requests. Try again later.");
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else if (-1 == tex.getStatusCode()) {
 			close();
-			LOGGER.log(Level.SEVERE, "Can not connect to the internet or the host is down.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"Can not connect to the internet or the host is down.");
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		} else {
 			close();
 			LOGGER.log(Level.SEVERE, "Unknown twitter-error occured.");
-			LOGGER.log(Level.SEVERE, "Exception: {0},\nMessage: {1},\nCause: {2}", 
-					new Object[]{tex, tex.getMessage(), tex.getCause()});
+			LOGGER.log(Level.SEVERE,
+					"Exception: {0},\nMessage: {1},\nCause: {2}", new Object[] {
+							tex, tex.getMessage(), tex.getCause() });
 		}
 	}
 
