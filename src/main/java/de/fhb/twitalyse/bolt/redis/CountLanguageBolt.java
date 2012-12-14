@@ -20,7 +20,6 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import org.mortbay.log.Log;
 
 public class CountLanguageBolt extends BaseRedisBolt {
 
@@ -35,22 +34,14 @@ public class CountLanguageBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		try {
+		String language = input.getString(1);
 
-			Long id = input.getLong(0);
-			String language = input.getString(1);
-//			Log.info("CountLanguageBolt Language: " + language);
+		this.zincrby("languages", 1d, language);
 
-			this.zincrby("languages", 1d, language);
-			
-			this.collector.emit(input, new Values(input.getLong(0)));
-			this.collector.ack(input);
-
-		} catch (Exception e) {
-			Log.warn(e);
-			this.collector.fail(input);
-		}
+		this.collector.emit(input, new Values(input.getLong(0)));
+		this.collector.ack(input);
 	}
+
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("id"));
