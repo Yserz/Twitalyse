@@ -42,7 +42,7 @@ public class CountSourceBolt extends BaseRedisBolt {
 		try {
 			long id = input.getLong(0);
 			String source = input.getString(1);
-			System.out.println("CountSourceBolt Word: " + source);
+//			Log.info("CountSourceBolt Word: " + source);
 
 			this.zincrby("sources", 1d, source);
 			this.collector.emit(input, new Values(input.getLong(0)));

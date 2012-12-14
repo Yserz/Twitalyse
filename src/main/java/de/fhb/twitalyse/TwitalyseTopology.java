@@ -60,7 +60,6 @@ import org.mortbay.log.Log;
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
 public class TwitalyseTopology {
-	private final static Logger LOGGER = Logger.getLogger(TwitalyseTopology.class.getName());
 
 	private static final String TWITTERSPOUT = "twitterSpout";
 	private TopologyBuilder builder;
@@ -103,7 +102,7 @@ public class TwitalyseTopology {
 		CountWordsInCircleBolt count = new CountWordsInCircleBolt(redisHost, redisPort);
 		
 
-		builder.setBolt("1_1 getCoords", coords, 8).allGrouping(TWITTERSPOUT);
+		builder.setBolt("1_1 getCoords", coords, 8).shuffleGrouping(TWITTERSPOUT);
 		builder.setBolt("1_2 filterCoords", filterCoords, 8).shuffleGrouping("1_1 getCoords");
 		builder.setBolt("1_3 splitText", splitText, 8).shuffleGrouping("1_2 filterCoords");
 		builder.setBolt("1_4 countWordsInCircle", count, 8).shuffleGrouping("1_3 splitText");
@@ -170,7 +169,7 @@ public class TwitalyseTopology {
 		CountLanguageBolt countLanguageBolt = new CountLanguageBolt(redisHost,
 				redisPort);
 
-		builder.setBolt("2_1 getLanguageBolt", getLanguageBolt, 4).allGrouping(
+		builder.setBolt("2_1 getLanguageBolt", getLanguageBolt, 4).shuffleGrouping(
 				TWITTERSPOUT);
 		builder.setBolt("2_2 countLanguageBolt", countLanguageBolt, 4)
 				.shuffleGrouping("2_1 getLanguageBolt");
@@ -206,7 +205,7 @@ public class TwitalyseTopology {
 				redisPort);
 
 		builder.setBolt("3_1 getStatusSourceBolt", getStatusSourceBolt, 10)
-				.noneGrouping(TWITTERSPOUT);
+				.shuffleGrouping(TWITTERSPOUT);
 		builder.setBolt("3_2 countSourceBolt", countSourceBolt, 10).shuffleGrouping(
 				"3_1 getStatusSourceBolt");
 	}
@@ -224,7 +223,7 @@ public class TwitalyseTopology {
 				stopWords, redisHost, redisPort);
 		CountWordsBolt countWordsBolt = new CountWordsBolt(redisHost, redisPort);
 
-		builder.setBolt("4_1 getTextBolt", getTextBolt, 8).allGrouping(
+		builder.setBolt("4_1 getTextBolt", getTextBolt, 8).shuffleGrouping(
 				TWITTERSPOUT);
 		builder.setBolt("4_2 splitStatusTextBolt", splitStatusTextBolt, 8)
 				.shuffleGrouping("4_1 getTextBolt");
@@ -246,7 +245,7 @@ public class TwitalyseTopology {
 			InvalidTopologyException, InterruptedException {
 		Config conf = new Config();
 		conf.setDebug(false);
-		conf.setMaxTaskParallelism(100);
+		conf.setMaxTaskParallelism(8);
 		if (args != null && args.length > 0) {
 			if (args.length > 1) {
 				conf.setNumWorkers(Integer.parseInt(args[1]));
@@ -257,8 +256,11 @@ public class TwitalyseTopology {
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());
 		} else {
-			conf.setMaxTaskParallelism(1);
-			conf.setNumWorkers(1);
+			conf.setMaxTaskParallelism(8);
+			conf.setNumWorkers(2);
+			conf.setMaxSpoutPending(1);
+			conf.setMessageTimeoutSecs(10);
+			conf.setNumAckers(1);
 			LocalCluster cluster = new LocalCluster();
 			Log.warn("Starting Cluster......");
 			cluster.submitTopology("twitalyse", conf, builder.createTopology());

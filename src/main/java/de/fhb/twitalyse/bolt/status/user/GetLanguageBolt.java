@@ -50,13 +50,13 @@ public class GetLanguageBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-		Log.info("GetLanguageBolt Status ID: {0}", id);
+//		Log.info("GetLanguageBolt Status ID: {0}", id);
 		String json = input.getString(1);
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			Log.info("GetLanguageBolt Extracted Status Language: {0}", ts.user.lang);
+//			Log.info("GetLanguageBolt Extracted Status Language: {0}", ts.user.lang);
 
 			collector.emit(new Values(id, ts.user.lang));
 			collector.ack(input);

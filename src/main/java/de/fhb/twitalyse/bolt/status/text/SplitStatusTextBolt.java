@@ -65,9 +65,9 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 		try {
 
 			long id = input.getLong(0);
-			Log.info("AnalyseStatusTextBolt Status ID: {0}", id);
+//			Log.info("AnalyseStatusTextBolt Status ID: {0}", id);
 			String text = input.getString(1);
-			Log.info("AnalyseStatusTextBolt Text: {0}", text);
+//			Log.info("AnalyseStatusTextBolt Text: {0}", text);
 
 			// Split text
 			text = text.toLowerCase().trim();

@@ -55,7 +55,7 @@ public class FilterCoordsBolt extends BaseRedisBolt {
 						new Values(input.getLong(0), input.getString(3)));
 				this.collector.ack(input);
 			} else {
-				Log.warn("is in NOT CIRCLE");
+//				Log.info("is NOT CIRCLE");
 				this.collector.ack(input);
 			}
 		} catch (Exception e) {

@@ -37,14 +37,14 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		Long id = input.getLong(0);
-		Log.info("GetStatusSourceBolt Status ID: {0}", id);
+//		Log.info("GetStatusSourceBolt Status ID: {0}", id);
 		String json = input.getString(1);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			Log.info("GetStatusSourceBolt Extracted Source Text: {0}", ts.source);
+//			Log.info("GetStatusSourceBolt Extracted Source Text: {0}", ts.source);
 			
 			String source = TwitterUtils.findSource(ts.source);
 

@@ -46,7 +46,7 @@ public class CountWordsBolt extends BaseRedisBolt {
 		try {
 			long id = input.getLong(0);
 			String word = input.getString(1);
-			System.out.println("CountWordsBolt Word: " + word);
+//			Log.info("CountWordsBolt Word: " + word);
 
 			Date today = new Date();
 			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");

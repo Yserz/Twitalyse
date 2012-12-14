@@ -54,14 +54,14 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		Long id = input.getLong(0);
-		Log.info("GetStatusTextBolt Status ID: {0}", id);
+//		Log.info("GetStatusTextBolt Status ID: {0}", id);
 		String json = input.getString(1);
 
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-			Log.info("GetStatusTextBolt Extracted Status Text: {0}", ts.text);
+//			Log.info("GetStatusTextBolt Extracted Status Text: {0}", ts.text);
 
 			collector.emit(input, new Values(id, ts.text));
 			collector.ack(input);

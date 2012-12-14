@@ -156,6 +156,7 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	@Override
 	public void fail(Object msgId) {
+		
 		Log.warn("FAIL "+msgId.toString());
 	}
 
