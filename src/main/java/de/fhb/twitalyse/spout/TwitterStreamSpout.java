@@ -56,8 +56,6 @@ import org.mortbay.log.Log;
  */
 public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
-	private final static Logger LOGGER = Logger
-			.getLogger(TwitterStreamSpout.class.getName());
 	// Keys die die App identifizieren
 	private final String CONSUMER_KEY;
 	private final String CONSUMER_KEY_SECURE;
@@ -65,7 +63,6 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	private final String TOKEN;
 	private final String TOKEN_SECRET;
 	private int id;
-	private AckFailDelegate ackFailDelegate;
 	private transient SpoutOutputCollector collector;
 	private transient TwitterStream twitterStream;
 	private String host;
@@ -73,7 +70,6 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	public TwitterStreamSpout(String consumerKey, String consumerKeySecure,
 			String token, String tokenSecret, String host, int port) {
-		id = InprocMessaging.acquireNewPort();
 		this.CONSUMER_KEY = consumerKey;
 		this.CONSUMER_KEY_SECURE = consumerKeySecure;
 		this.TOKEN = token;
@@ -82,9 +78,6 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 		this.port = port;
 	}
 
-	public void setAckFailDelegate(AckFailDelegate d) {
-		ackFailDelegate = d;
-	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
@@ -159,21 +152,11 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
 	@Override
 	public void ack(Object msgId) {
-		
-		if (ackFailDelegate != null) {
-			ackFailDelegate.ack(msgId);
-		}else {
-			Log.warn("ackfaildelegeate = null");
-		}
 	}
 
 	@Override
 	public void fail(Object msgId) {
-		if (ackFailDelegate != null) {
-			ackFailDelegate.fail(msgId);
-		}else {
-			Log.warn("ackfaildelegeate = null");
-		}
+		Log.warn("FAIL "+msgId.toString());
 	}
 
 	@Override
