@@ -17,8 +17,8 @@
 package de.fhb.twitalyse.bolt.status.user;
 
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.mortbay.log.Log;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -31,38 +31,39 @@ import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 
 import de.fhb.twitalyse.bolt.data.Status;
-import org.mortbay.log.Log;
 
 /**
  * This Bolt gets the Twitter Language Text out of the whole Status.
- *
+ * 
  * @author Andy Klay <klay@fh-brandenburg.de>
  */
 public class GetLanguageBolt extends BaseRichBolt {
-	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4172450783791124666L;
 	private OutputCollector collector;
 
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map stormConf, TopologyContext context,
+			OutputCollector collector) {
 		this.collector = collector;
 	}
 
 	@Override
 	public void execute(Tuple input) {
 		long id = input.getLong(0);
-//		Log.info("GetLanguageBolt Status ID: {0}", id);
 		String json = input.getString(1);
 		try {
 			Gson gson = new Gson();
 			Status ts = gson.fromJson(json, Status.class);
 
-//			Log.info("GetLanguageBolt Extracted Status Language: {0}", ts.user.lang);
-
 			collector.emit(new Values(id, ts.user.lang));
 			collector.ack(input);
 		} catch (RuntimeException re) {
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}", 
-					new Object[]{re, re.getMessage(), re.getCause(), json});
+			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}",
+					new Object[] { re, re.getMessage(), re.getCause(), json });
 			collector.fail(input);
 		}
 

@@ -1,4 +1,4 @@
-package de.fhb.twitalyse.bolt.status.source;
+package de.fhb.twitalyse.bolt.status.hashtag;
 
 import java.util.Map;
 
@@ -12,15 +12,15 @@ import backtype.storm.tuple.Values;
 
 import com.google.gson.Gson;
 
+import de.fhb.twitalyse.bolt.data.Hashtag;
 import de.fhb.twitalyse.bolt.data.Status;
-import de.fhb.twitalyse.utils.TwitterUtils;
 
 /**
  * This Bolt gets the Twitter Status Source out of the whole Status.
  * 
  * @author Christoph Ott <ott@fh-brandenburg.de>
  */
-public class GetStatusSourceBolt extends BaseRichBolt {
+public class GetHashTagsBolt extends BaseRichBolt {
 
 	/**
 	 * 
@@ -42,15 +42,14 @@ public class GetStatusSourceBolt extends BaseRichBolt {
 		Gson gson = new Gson();
 		Status ts = gson.fromJson(json, Status.class);
 
-		String source = TwitterUtils.findSource(ts.source);
-
-		collector.emit(input, new Values(id, source));
+		for (Hashtag hashtag : ts.entities.hashtags) {
+			collector.emit(input, new Values(id, hashtag.text));
+		}
 		collector.ack(input);
-
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("id", "text"));
+		declarer.declare(new Fields("id", "hashtag"));
 	}
 }

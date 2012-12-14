@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Andy Klay
+ * Copyright (C) 2012 Michael Koppen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,27 +16,39 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
-public class CountLanguageBolt extends BaseRedisBolt {
+/**
+ * This Bolt gets the Twitter Status Text out of the whole Status.
+ * 
+ * @author Michael Koppen <koppen@fh-brandenburg.de>
+ */
+public class CountHashTagsBolt extends BaseRedisBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -8511876250962000527L;
+	private static final long serialVersionUID = -3012129841702694630L;
 
-	public CountLanguageBolt(String host, int port) {
+	public CountHashTagsBolt(String host, int port) {
 		super(host, port);
 	}
 
 	@Override
 	public void execute(Tuple input) {
-		String language = input.getString(1);
+		String hashtag = input.getString(1);
 
-		this.zincrby("languages", 1d, language);
+		Date today = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+
+		this.zincrby("hashtags_" + sdf.format(today), 1d, hashtag);
+		this.zincrby("hashtags", 1d, hashtag);
 
 		this.collector.emit(input, new Values(input.getLong(0)));
 		this.collector.ack(input);

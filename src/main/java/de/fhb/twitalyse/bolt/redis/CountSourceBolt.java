@@ -20,7 +20,6 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import org.mortbay.log.Log;
 
 /**
  * 
@@ -39,19 +38,11 @@ public class CountSourceBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		try {
-			long id = input.getLong(0);
 			String source = input.getString(1);
-//			Log.info("CountSourceBolt Word: " + source);
 
 			this.zincrby("sources", 1d, source);
 			this.collector.emit(input, new Values(input.getLong(0)));
 			this.collector.ack(input);
-
-		} catch (Exception e) {
-			Log.warn(e);
-			this.collector.fail(input);
-		}
 	}
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {

@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -32,7 +30,6 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import de.fhb.twitalyse.bolt.redis.BaseRedisBolt;
-import org.mortbay.log.Log;
 
 /**
  * This Bolt analyses the given Twitter Status Text.
@@ -62,37 +59,30 @@ public class SplitStatusTextBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		try {
 
-			long id = input.getLong(0);
-//			Log.info("AnalyseStatusTextBolt Status ID: {0}", id);
-			String text = input.getString(1);
-//			Log.info("AnalyseStatusTextBolt Text: {0}", text);
+		long id = input.getLong(0);
+		String text = input.getString(1);
 
-			// Split text
-			text = text.toLowerCase().trim();
-			List<String> splittedText = Arrays.asList(text.split(" "));
+		// Split text
+		text = text.toLowerCase().trim();
+		List<String> splittedText = Arrays.asList(text.split(" "));
 
-			Date today = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+		Date today = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
 
-			for (String word : splittedText) {
-				word = word.trim();
-				if (!word.equals("")) {
-					// Saves # of all words
-					this.incr("#words_full");
-					// Saves # of words of today
-					this.incr("#words_full_" + sdf.format(today));
-					if (word.length() >= 3 && !ignoreWords.contains(word)) {
-						collector.emit(new Values(id, word));
-					}
+		for (String word : splittedText) {
+			word = word.trim();
+			if (!word.equals("")) {
+				// Saves # of all words
+				this.incr("#words_full");
+				// Saves # of words of today
+				this.incr("#words_full_" + sdf.format(today));
+				if (word.length() >= 3 && !ignoreWords.contains(word)) {
+					collector.emit(new Values(id, word));
 				}
 			}
-			collector.ack(input);
-		} catch (Exception e) {
-			Log.warn(e);
-			this.collector.fail(input);
 		}
+		collector.ack(input);
 	}
 
 	@Override

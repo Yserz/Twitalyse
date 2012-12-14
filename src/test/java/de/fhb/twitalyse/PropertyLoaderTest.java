@@ -18,8 +18,10 @@ package de.fhb.twitalyse;
 
 import java.util.Properties;
 import java.util.Set;
-import junit.framework.TestCase;
+
 import org.junit.Test;
+
+import de.fhb.twitalyse.utils.PropertyLoader;
 
 /**
  *

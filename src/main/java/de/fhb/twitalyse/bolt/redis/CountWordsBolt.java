@@ -16,14 +16,13 @@
  */
 package de.fhb.twitalyse.bolt.redis;
 
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Fields;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import org.mortbay.log.Log;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
@@ -43,31 +42,24 @@ public class CountWordsBolt extends BaseRedisBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		try {
-			long id = input.getLong(0);
-			String word = input.getString(1);
-//			Log.info("CountWordsBolt Word: " + word);
+		String word = input.getString(1);
 
-			Date today = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
+		Date today = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd_MM_yyyy");
 
-			// Saves all words of today
-			this.zincrby("words_" + sdf.format(today), 1d, word);
-			// Saves all words
-			this.zincrby("words", 1d, word);
-			// Saves # of filtered words
-			this.incr("#words_filtered");
-			// Saves # of filtered words of today
-			this.incr("#words_filtered_" + sdf.format(today));
+		// Saves all words of today
+		this.zincrby("words_" + sdf.format(today), 1d, word);
+		// Saves all words
+		this.zincrby("words", 1d, word);
+		// Saves # of filtered words
+		this.incr("#words_filtered");
+		// Saves # of filtered words of today
+		this.incr("#words_filtered_" + sdf.format(today));
 
-			this.collector.emit(input, new Values(input.getLong(0)));
-			this.collector.ack(input);
-
-		} catch (Exception e) {
-			Log.warn(e);
-			this.collector.fail(input);
-		}
+		this.collector.emit(input, new Values(input.getLong(0)));
+		this.collector.ack(input);
 	}
+
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("id"));

@@ -1,8 +1,8 @@
 package de.fhb.twitalyse.bolt.redis;
 
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.mortbay.log.Log;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
@@ -10,7 +10,6 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
-import org.mortbay.log.Log;
 
 /**
  * Some Redis Operations

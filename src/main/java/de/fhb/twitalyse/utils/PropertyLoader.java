@@ -1,4 +1,4 @@
-package de.fhb.twitalyse;
+package de.fhb.twitalyse.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

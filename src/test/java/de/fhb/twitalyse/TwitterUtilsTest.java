@@ -1,15 +1,8 @@
 package de.fhb.twitalyse;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.junit.Ignore;
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import de.fhb.twitalyse.utils.TwitterUtils;
 
