@@ -84,8 +84,8 @@ public class TwitalyseTopology {
 		builder = new TopologyBuilder();
 		initTwitterSpout();
 		initSourceCount();
-//		initWordCount();
-//		initLanguageCount();
+		initWordCount();
+		initLanguageCount();
 		initGetCoordsInCircle();
 	}
 	
@@ -245,7 +245,7 @@ public class TwitalyseTopology {
 	public void startTopology(String[] args) throws AlreadyAliveException,
 			InvalidTopologyException, InterruptedException {
 		Config conf = new Config();
-		conf.setDebug(true);
+		conf.setDebug(false);
 		conf.setMaxTaskParallelism(100);
 		if (args != null && args.length > 0) {
 			if (args.length > 1) {
