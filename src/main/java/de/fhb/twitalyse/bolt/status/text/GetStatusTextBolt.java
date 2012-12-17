@@ -18,7 +18,6 @@ package de.fhb.twitalyse.bolt.status.text;
 
 import java.util.Map;
 
-import org.mortbay.log.Log;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -31,6 +30,8 @@ import backtype.storm.tuple.Values;
 import com.google.gson.Gson;
 
 import de.fhb.twitalyse.bolt.data.Status;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This Bolt gets the Twitter Status Text out of the whole Status.
@@ -42,6 +43,7 @@ public class GetStatusTextBolt extends BaseRichBolt {
 	 * 
 	 */
 	private static final long serialVersionUID = 6427253027765292007L;
+	private final static Logger LOGGER = Logger.getLogger(GetStatusTextBolt.class.getName());
 	private OutputCollector collector;
 
 	@Override
@@ -62,7 +64,7 @@ public class GetStatusTextBolt extends BaseRichBolt {
 			collector.emit(input, new Values(id, ts.text));
 			collector.ack(input);
 		} catch (RuntimeException re) {
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}",
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2},\nJSON: {3}",
 					new Object[] { re, re.getMessage(), re.getCause(), json });
 			collector.fail(input);
 		}

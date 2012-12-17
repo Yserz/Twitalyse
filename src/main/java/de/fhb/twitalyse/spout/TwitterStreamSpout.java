@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.mortbay.log.Log;
 
 import redis.clients.jedis.Jedis;
 import twitter4j.Status;
@@ -42,6 +41,8 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.InprocMessaging;
 import backtype.storm.utils.Utils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This Spout connects to the Twitter API and opens up a Stream. The Spout
@@ -52,10 +53,7 @@ import backtype.storm.utils.Utils;
  */
 public class TwitterStreamSpout implements IRichSpout, StatusListener {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3161855430651857943L;
+	private final static Logger LOGGER = Logger.getLogger(TwitterStreamSpout.class.getName());
 	// Keys die die App identifizieren
 	private final String CONSUMER_KEY;
 	private final String CONSUMER_KEY_SECURE;
@@ -146,66 +144,66 @@ public class TwitterStreamSpout implements IRichSpout, StatusListener {
 	@Override
 	public void fail(Object msgId) {
 
-		Log.warn("FAIL " + msgId.toString());
+		LOGGER.log(Level.SEVERE, "FAIL {0}", msgId.toString());
 	}
 
 	@Override
 	public void onException(Exception ex) {
-		Log.warn(ex);
+		LOGGER.log(Level.SEVERE, null, ex);
 		TwitterException tex = (TwitterException) ex;
 		if (400 == tex.getStatusCode()) {
 			close();
-			Log.warn(
+			LOGGER.log(Level.SEVERE,
 					"Rate limit texceeded. Clients may not make more than {0} requests per hour. \nThe ntext reset is {1}",
 					new Object[] { tex.getRateLimitStatus().getHourlyLimit(),
 							tex.getRateLimitStatus().getResetTime() });
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (401 == tex.getStatusCode()) {
 			close();
-			Log.warn("Authentication credentials were missing or incorrect.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Authentication credentials were missing or incorrect.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (403 == tex.getStatusCode()) {
-			Log.warn("Duplicated status.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Duplicated status.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (404 == tex.getStatusCode()) {
-			Log.warn("The URI requested is invalid or the resource requested, such as a user, does not exists.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"The URI requested is invalid or the resource requested, such as a user, does not exists.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (406 == tex.getStatusCode()) {
-			Log.warn("Request returned - invalid format is specified in the request.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Request returned - invalid format is specified in the request.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (420 == tex.getStatusCode()) {
 			close();
-			Log.warn("Too many logins with your account in a short time.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Too many logins with your account in a short time.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (500 == tex.getStatusCode()) {
-			Log.warn("Something is broken. Please post to the group so the Twitter team can investigate.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Something is broken. Please post to the group so the Twitter team can investigate.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (502 == tex.getStatusCode()) {
 			close();
-			Log.warn("Twitter is down or being upgraded.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Twitter is down or being upgraded.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (503 == tex.getStatusCode()) {
 			close();
-			Log.warn("The Twitter servers are up, but overloaded with requests. Try again later.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"The Twitter servers are up, but overloaded with requests. Try again later.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else if (-1 == tex.getStatusCode()) {
 			close();
-			Log.warn("Can not connect to the internet or the host is down.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Can not connect to the internet or the host is down.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		} else {
 			close();
-			Log.warn("Unknown twitter-error occured.");
-			Log.warn("Exception: {0},\nMessage: {1},\nCause: {2}",
+			LOGGER.log(Level.SEVERE,"Unknown twitter-error occured.");
+			LOGGER.log(Level.SEVERE,"Exception: {0},\nMessage: {1},\nCause: {2}",
 					new Object[] { tex, tex.getMessage(), tex.getCause() });
 		}
 	}
